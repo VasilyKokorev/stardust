@@ -28,6 +28,6 @@ The primary use of this code is to extract the parameters from the infrared phot
 The program also has an ability to fit AGN and Stellar emission templates, if the user desires to do so.
 
 
-The example data-set, a subset from the COSMOS Super-Debldended Catalogue 2  `Jin+18 <https://ui.adsabs.harvard.edu/abs/2018ApJ...864...56J/abstract>`__ along with the example configuration files are provided in the `example folder <https://github.com/VasilyKokorev/ctf/tree/master/example>`__.
+An example data-set, a subset from the COSMOS Super-Debldended Catalogue 2  `Jin+18 <https://ui.adsabs.harvard.edu/abs/2018ApJ...864...56J/abstract>`__ along with the example configuration files are provided in the `example folder <https://github.com/VasilyKokorev/ctf/tree/master/example>`__.
 
-See the /docs folder for detailed instructions.
+See the `docs folder <https://github.com/VasilyKokorev/ctf/tree/master/docs>`__ for more detailed instructions.
