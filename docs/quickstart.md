@@ -50,7 +50,9 @@ To parse those a separate text file is required, see [example](https://github.co
 
 This creates a square-wave, centred at the defined wavelegnth with a width of 10 microns.
 
+# Preparing the input catalogue: 
 
+Currently the only accepted format is a standard **astropy .fits Table**
 
 
  
