@@ -15,7 +15,7 @@ Requirements:
        
 Installation:
 ~~~~~~~~~~~~~
-Not required.
+Not required. Just git pull the software to a desired directory.
 
     .. code:: bash
     
