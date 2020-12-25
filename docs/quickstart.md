@@ -14,7 +14,25 @@ Create a text file that contains the following information:
 **<ins>The input flux and flux errors must be in mJy!</ins>**
 
 
-Use the template below as an example.
+Use the template below as an example for the input bands:
+
+
+18 FCH1 DFCH1
+19 FCH2 DFCH2
+20 FCH3 DFCH3
+21 FCH4 DFCH4
+325 F24 DF24
+329 F100 DF100
+330 F160 DF160
+331 F250 DF250
+332 F350 DF350
+333 F500 DF500
+324 F850 DF850
+348 F1100 DF1100
+350 F1200 DF1200
+
+
+
 Params:
 
 Currently the code needs the galaxy id and the redshift in order to fit a source.
