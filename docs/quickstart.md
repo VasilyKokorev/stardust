@@ -48,6 +48,8 @@ To parse those a separate text file is required, see [example](https://github.co
 
 **<ins>Wavelength should be given in microns.</ins>**
 
+This creates a square-wave, centred at the defined wavelegnth with a width of 10 microns.
+
 
 
 
