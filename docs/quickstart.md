@@ -57,4 +57,10 @@ This file must contain columns containing the object id, redshift and photometry
 
 Missing photometry/redshift etc. should have a value of **-99**.
 
- 
+
+# Starting a run: 
+-----
+
+(Very preliminary)
+
+Navigate to the [init.py](https://github.com/VasilyKokorev/ctf/blob/master/init.py) and provide the paths for the input catalogue, bands and param files, as well as a path to the output directory.
