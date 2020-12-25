@@ -48,6 +48,8 @@ To parse those a separate text file is required, see [example](https://github.co
 
 This creates a square-wave, centred at the defined wavelegnth with a width of 10 microns.
 
+Do not forget to set **extra_bands** to **True** in [init.py](https://github.com/VasilyKokorev/ctf/blob/master/init.py).
+
 # Preparing the input catalogue: 
 -----
 
