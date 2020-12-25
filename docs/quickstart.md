@@ -30,5 +30,13 @@ Additionally it is possible to give the stellar mass (in units of Msol), if one 
 
 If stellar mass is not available in your catalogue the mstar_colname should be given as *None*
 
-Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob/master/example/example.param)
+Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob/master/example/example.param).
+
+
+Non-standard photometric bands:
+-----
+
+The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some of the objects in your catalogue have ALMA photometry available for them.
+
+
  
