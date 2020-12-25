@@ -18,8 +18,11 @@ Use the template below as an example for the input bands:
 
 
 18 FCH1 DFCH1
+
 19 FCH2 DFCH2
+
 20 FCH3 DFCH3
+
 21 FCH4 DFCH4
 325 F24 DF24
 329 F100 DF100
