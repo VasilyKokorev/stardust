@@ -13,8 +13,6 @@ Requirements:
        astropy
        multiprocessing
        
-       ...
-       
 Installation:
 ~~~~~~~~~~~~~
 Not required.
