@@ -13,6 +13,8 @@ Create a text file that contains the following information:
 
 **<ins>The input flux and flux errors must be in mJy!</ins>**
 
+(this would be changed in future versions)
+
 
 Use this [template](https://github.com/VasilyKokorev/ctf/blob/master/example/example.bands) as an example for the input bands.
 
@@ -22,8 +24,9 @@ Any text format that can be read by numpy.loadtxt should work.
 Params:
 -----
 
-Currently the code needs the galaxy id and the redshift in order to fit a source.
-Stellar mass Mstar is not required, but if available it can be used to compute the gas-to-dust ratio.
+The software requires for a given object to have an **ID** and a **redshift**. 
+
+
 
 Stellar mass in your catalogue should be in units of Msol.
 
