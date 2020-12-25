@@ -11,7 +11,7 @@ Create a text file that contains the following information:
 
 **Column III:** Error array
 
-**_The input flux and flux err must be in mJy!_**
+_The input flux and flux err must be in mJy!_**
 
 Use the template below as an example.
 Params:
