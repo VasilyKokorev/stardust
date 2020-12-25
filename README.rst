@@ -22,3 +22,6 @@ Not required.
         $ git git@github.com:VasilyKokorev/ctf.git
         $ cd ctf
   
+Usage:
+~~~~~~
+See the /docs folder
