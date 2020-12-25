@@ -46,7 +46,7 @@ To parse those a separate text file is required, see [example](https://github.co
 
 **Column III:** Error column name.
 
-Wavelength should be given in microns. 
+**<ins>Wavelength should be given in microns.</ins>**
 
 
 
