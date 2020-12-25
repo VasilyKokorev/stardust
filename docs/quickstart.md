@@ -7,9 +7,9 @@ Create a text file that contains the following information:
 
 **Column I:** Filter *ID* as given in the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) file.
 
-**Column II:** Name of the flux array corresponding to that filter in your input table.
+**Column II:** Flux column name.
 
-**Column III:** Error array corresponding to the flux array.
+**Column III:** Error column name.
 
 **<ins>The input flux and flux errors must be in mJy!</ins>**
 
