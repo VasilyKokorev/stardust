@@ -29,4 +29,5 @@ The program also has an ability to fit AGN and Stellar emission templates, if th
 
 
 The example data-set, a subset from the COSMOS Super-Debldended Catalogue 2  `Jin+18 <https://ui.adsabs.harvard.edu/abs/2018ApJ...864...56J/abstract>`__
+
 See the /docs folder for detailed instructions.
