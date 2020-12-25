@@ -5,11 +5,11 @@ Bands:
 
 Create a text file that contains the following information:
 
-**Column I:** Filter *ID* as given in the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) file
+**Column I:** Filter *ID* as given in the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) file.
 
-**Column II:** Name of the flux array corresponding to that filter in your input table
+**Column II:** Name of the flux array corresponding to that filter in your input table.
 
-**Column III:** Error array
+**Column III:** Error array corresponding to the flux array.
 
 **<ins>The input flux and flux errors must be in mJy!</ins>**
 
