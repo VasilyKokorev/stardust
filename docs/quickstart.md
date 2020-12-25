@@ -1,7 +1,7 @@
 # Defining band names and parameters: 
+-----
 
 ## Bands:
------
 
 Create a text file that contains the following information:
 
@@ -22,7 +22,6 @@ Any text format that can be read by numpy.loadtxt should work.
 
 
 ## Params:
------
 
 The software requires for a given object to have an **ID** and a **redshift**. 
 
@@ -34,7 +33,6 @@ Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob
 
 
 ## Non-standard photometric bands:
------
 
 The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some of the objects in your catalogue have ALMA photometry available for them.
 
@@ -51,6 +49,7 @@ To parse those a separate text file is required, see [example](https://github.co
 This creates a square-wave, centred at the defined wavelegnth with a width of 10 microns.
 
 # Preparing the input catalogue: 
+-----
 
 Currently the only accepted table format is **.fits**.
 
