@@ -24,4 +24,9 @@ Not required.
   
 Usage:
 ~~~~~~
-See the /docs folder
+The primary use of this code is to extract the parameters from the infrared photometry. 
+The program also has an ability to fit AGN and Stellar emission templates, if the user desires to do so.
+
+
+
+See the /docs folder for detailed instructions.
