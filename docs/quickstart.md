@@ -54,5 +54,8 @@ This creates a square-wave, centred at the defined wavelegnth with a width of 10
 
 Currently the only accepted table format is **.fits**.
 
+This file must contain columns containing the object id, redshift and photometry with uncertainties, as defined outlined in the previous section.
+
+Missing photometry/redshift etc. should have a value of **-99**.
 
  
