@@ -1,6 +1,6 @@
 # Defining band names and parameters: 
 
-Bands:
+##Bands:
 -----
 
 Create a text file that contains the following information:
@@ -21,7 +21,7 @@ Use this [template](https://github.com/VasilyKokorev/ctf/blob/master/example/exa
 Any text format that can be read by numpy.loadtxt should work.
 
 
-Params:
+##Params:
 -----
 
 The software requires for a given object to have an **ID** and a **redshift**. 
@@ -33,7 +33,7 @@ If stellar mass is not available in your catalogue the mstar_colname should be g
 Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob/master/example/example.param).
 
 
-Non-standard photometric bands:
+##Non-standard photometric bands:
 -----
 
 The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some of the objects in your catalogue have ALMA photometry available for them.
