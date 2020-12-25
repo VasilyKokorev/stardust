@@ -1,10 +1,11 @@
 
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='/Users/vasily/Documents/Tables/COSMOS_2020_FIR.fits'
+#cat_name='/Users/vasily/Documents/Tables/COSMOS_2020_FIR.fits'
+cat_name='/Users/vasily/Documents/PhD/Projects/release/ctf/example/COSMOS_SDC2_example.fits'
 
-bands_file='cosmos2020_bands.param'
-param_file='cosmos2020_param.param'
+bands_file='/Users/vasily/Documents/PhD/Projects/release/ctf/example/example.bands'
+param_file='/Users/vasily/Documents/PhD/Projects/release/ctf/example/example.param'
 
 extra_bands_file=''
 
@@ -12,9 +13,9 @@ extra_bands_file=''
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/output/'
+PATH = '/Users/vasily/Documents/PhD/Projects/release/ctf/example/output/'
 
-output_name='test' #Name of output table
+output_name='example_output' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -25,19 +26,19 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 
 'GENERAL SETTINGS'
 #===============================================================================
-multithread=False
-verbose=1 # Allowed 0,1,2
+multithread=True
+verbose=2 # Allowed 0,1,2
 extra_bands=False
 
 use_cold_dl=True
 
-diagplot=True
+diagplot=False
 radio=True
 
-save_fig=True
-save_table=False
+save_fig=False
+save_table=True
 save_sed=True
-save_covar=True
+save_covar=False
 
 impose_cut=False
 #===============================================================================
@@ -125,7 +126,7 @@ dat3=lam[0].data
 
 DATA=Table.read(f'{cat_name}', memmap=True)
 
-DATA=DATA[DATA['ID_FIR']==641953]
+#DATA=DATA[DATA['ID_FIR']==641953]
 
 
 print(f'Read a catalogue with {len(DATA)} objects')

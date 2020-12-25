@@ -31,7 +31,7 @@ from functions import *
 
 timer_start=time.time()
 
-from config import *
+from init import *
 #----------------------------------------
 #Loading Data
 
@@ -80,7 +80,11 @@ def galproc(galaxy):
         print ('Calculating index:',(P[galaxy_index,0]))
 
 
+
     z=P[galaxy_index,1]
+    if z<=0:
+        print(f'ID:{P[galaxy_index,0]} has z<=0, skipped')
+        return None
 
     try:
         Mstar=P[galaxy_index,2]
