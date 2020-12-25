@@ -1,3 +1,3 @@
-id ID
-z zspec
-Mstar Mstar
+id_colname ID
+redshift_colname zphot
+mstar_colname Mstar
