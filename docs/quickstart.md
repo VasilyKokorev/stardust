@@ -52,7 +52,7 @@ This creates a square-wave, centred at the defined wavelegnth with a width of 10
 
 # Preparing the input catalogue: 
 
-Currently the only accepted format is a standard **astropy .fits Table**
+Currently the only accepted table format is **.fits**.
 
 
  
