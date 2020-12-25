@@ -7,10 +7,11 @@ Create a text file that contains the following information:
 
 **Column I:** Filter *ID* as given in the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) file
 
-Column II: Name of the flux array corresponding to that filter in your input table
-Column III: Error array
+**Column II:** Name of the flux array corresponding to that filter in your input table
 
-The input flux and flux err must be in mJy!
+**Column III:** Error array
+
+**_The input flux and flux err must be in mJy!_**
 
 Use the template below as an example.
 Params:
