@@ -28,5 +28,5 @@ The primary use of this code is to extract the parameters from the infrared phot
 The program also has an ability to fit AGN and Stellar emission templates, if the user desires to do so.
 
 
-
+The example data-set, a subset from the COSMOS Super-Debldended Catalogue 2 [Jin+17](https://ui.adsabs.harvard.edu/abs/2018ApJ...864...56J/abstract)
 See the /docs folder for detailed instructions.
