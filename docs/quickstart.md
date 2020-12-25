@@ -26,16 +26,9 @@ Params:
 
 The software requires for a given object to have an **ID** and a **redshift**. 
 
+Additionally it is possible to give the stellar mass (in units of Msol), if one wishes to compute the gas-to-dust ratio and gas mass.
 
+If stellar mass is not available in your catalogue the mstar_colname should be given as *None*
 
-Stellar mass in your catalogue should be in units of Msol.
-
-Define the params file as shown below:
-
-Column I: Internal naming convention. Do not change.
-Column II: Names for these params in your input table.
-
-If stellar mass is not available in your catalogue, write None, in the second column, instead of Mstar. 
-
-
-  
+Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob/master/example/example.param)
+ 
