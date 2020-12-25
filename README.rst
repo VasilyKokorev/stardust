@@ -14,7 +14,8 @@ Requirements:
        
 Installation:
 ~~~~~~~~~~~~~
-Not required. 
-$ git clone git@github.com:VasilyKokorev/ctf.git
-$ cd ctf 
-        
+    .. code:: bash
+    
+        $ git git@github.com:VasilyKokorev/ctf.git
+        $ cd ctf
+        $ pip install . 
