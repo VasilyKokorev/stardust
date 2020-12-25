@@ -6,10 +6,13 @@ This repository provides an SED fitting tool, primarily focused on the IR part o
 Requirements: 
 ~~~~~~~~~~~~~
     .. code:: 
-       astropy
-       numpy 
+    
+
+       numpy
        scipy
+       astropy
        multiprocessing
+       
        ...
        
 Installation:
