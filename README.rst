@@ -19,7 +19,7 @@ Not required. Just git pull the software to a desired directory.
 
     .. code:: bash
     
-        $ git git@github.com:VasilyKokorev/ctf.git
+        $ git clone git@github.com:VasilyKokorev/ctf.git
         $ cd ctf
   
 Usage:
