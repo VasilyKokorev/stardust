@@ -32,6 +32,7 @@ from functions import *
 timer_start=time.time()
 
 from init import *
+from config import *
 #----------------------------------------
 #Loading Data
 
@@ -46,19 +47,7 @@ def S(i,j,k):
     #sed=sed*Lsol*(np.sqrt(integrate.trapz(sed,RFullnu)**2))**-1  #Normaliser
     sed=np.array(sed)
     return sed
-
 #------------------------------------------------------------------------------
-'''
-#Load filters
-filter_arr=Table.read('filters/ft.fits')
-filter_l=filter_arr['lambda']
-
-filt=[]
-for col in filter_arr[filtname].colnames:
-    filt.append(np.array(filter_arr[col]))
-
-print(len(filt))
-'''
 
 assert len(sfx)==len(FILTERS)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
 
@@ -66,7 +55,7 @@ assert len(sfx)==len(FILTERS)==len(band_names)==len(err_band_names),'ERROR: Filt
 print('Photometry range ok')
 
 #---------------------------------------------------------
-#Pull GB optical and AGN templates
+#Import templates
 from template_importer import *
 
 #---------------------------------------------------------
@@ -104,8 +93,8 @@ def galproc(galaxy):
 
 
 
-    flux_i=G[galaxy_index,:]*10**-3
-    flux_i_e=E[galaxy_index,:]*10**-3
+    flux_i=G[galaxy_index,:]
+    flux_i_e=E[galaxy_index,:]
     flux_i_e_orig=np.copy(flux_i_e)
 
     snr=flux_i/flux_i_e
@@ -430,7 +419,7 @@ def galproc(galaxy):
 
 
 
-    print(np.std(np.log10(reddest_flux)))
+    #print(np.std(np.log10(reddest_flux)))
     #sys.exit()
     x = np.arange(-2, 2, .1)
     scatt = stats.norm.pdf(x,scale=0.3)
@@ -608,10 +597,10 @@ def galproc(galaxy):
         textxpos=0.6
         textsep=0.08
 
-        if radio:
-            radio_points=10**-3*np.array([DATA['FIR_10CM_FLUX'][galaxy_index],DATA['FIR_20CM_FLUX'][galaxy_index]])
-            e_radio_points=10**-3*np.array([DATA['FIR_10CM_FLUXERR'][galaxy_index],DATA['FIR_20CM_FLUXERR'][galaxy_index]])
-            radio_bands=np.array([10**5,2*10**5])
+        #if radio:
+        #    radio_points=10**-3*np.array([DATA['FIR_10CM_FLUX'][galaxy_index],DATA['FIR_20CM_FLUX'][galaxy_index]])
+        #    e_radio_points=10**-3*np.array([DATA['FIR_10CM_FLUXERR'][galaxy_index],DATA['FIR_20CM_FLUXERR'][galaxy_index]])
+        #    radio_bands=np.array([10**5,2*10**5])
         #    radio_points=np.array([DATA['f3g'][galaxy_index],DATA['f14g'][galaxy_index]])
         #    e_radio_points=np.array([DATA['ef3g'][galaxy_index],DATA['ef14g'][galaxy_index]])
 
@@ -652,13 +641,11 @@ def galproc(galaxy):
 
         plt.errorbar(wav_ar[points],flux[points],yerr=flux_e_orig[points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
         plt.scatter(wav_ar[~points],(flux+3*flux_e_orig)[~points],marker=r'$\downarrow$',s=300,color='red',zorder=11)
-        if radio:
-            points_radio=((radio_points/e_radio_points)>=3)
-            plt.errorbar(radio_bands[points_radio],radio_points[points_radio],yerr=e_radio_points[points_radio],color='blue',fmt='o',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
-            plt.scatter(radio_bands[~points_radio],(radio_points+3*e_radio_points)[~points_radio],marker=r'$\downarrow$',s=300,color='b',zorder=11)
+        #if radio:
+        #    points_radio=((radio_points/e_radio_points)>=3)
+        #    plt.errorbar(radio_bands[points_radio],radio_points[points_radio],yerr=e_radio_points[points_radio],color='blue',fmt='o',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
+        #    plt.scatter(radio_bands[~points_radio],(radio_points+3*e_radio_points)[~points_radio],marker=r'$\downarrow$',s=300,color='b',zorder=11)
 
-        #add_text_to_ax(0.05, 0.95, r'ID {}'.format(int(P[galaxy_index,0])),ax=ax,fontsize=20, color='k')
-        #add_text_to_ax(0.05, 0.95-textsep, r'z={:.2f}'.format(z),ax=ax,fontsize=20, color='k',usetex=True)
 
         plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
         plt.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
@@ -676,7 +663,7 @@ def galproc(galaxy):
         yscale('log')
         xscale('log')
         plt.tight_layout()
-        plt.savefig('sed_example_new_code.pdf')
+
 
         if save_fig:
             plt.savefig(figloc + str(int(P[galaxy_index,0])) + ".pdf")
