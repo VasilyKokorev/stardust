@@ -1,10 +1,10 @@
 'INPUT PARAMETERS'
 #===============================================================================
-#cat_name='/Users/vasily/Documents/Tables/COSMOS_2020_FIR.fits'
-cat_name='/Users/vasily/Documents/PhD/Projects/release/ctf/example/COSMOS_SDC2_example.fits'
+cat_name='/Users/vasily/Documents/Tables/sdc+laigle.fits'
+#cat_name='/Users/vasily/Documents/PhD/Projects/release/ctf/example/COSMOS_SDC2_example.fits'
 
-bands_file='/Users/vasily/Documents/PhD/Projects/release/ctf/example/example.bands'
-param_file='/Users/vasily/Documents/PhD/Projects/release/ctf/example/example.param'
+bands_file='/Users/vasily/Documents/PhD/Projects/release/ctf/configs/cosmos2015_bands.param'
+param_file='/Users/vasily/Documents/PhD/Projects/release/ctf/configs/cosmos2015_param.param'
 
 extra_bands_file=''
 
@@ -12,7 +12,7 @@ extra_bands_file=''
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/ctf/example/output/'
+PATH = '/Users/vasily/Documents/PhD/Projects/release/output/'
 
 output_name='example_output' #Name of output table
 
@@ -26,18 +26,18 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 'GENERAL SETTINGS'
 #===============================================================================
 flux_unit=''
-multithread=True
+multithread=False
 verbose=1 # Allowed 0,1,2
 extra_bands=False
 
 use_cold_dl=True
 
-diagplot=False
+diagplot=True
 radio=True
 
 save_fig=False
-save_table=True
-save_sed=True
+save_table=False
+save_sed=False
 save_covar=False
 
 impose_cut=False

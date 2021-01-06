@@ -39,14 +39,16 @@ from config import *
 #--------------------------------------------------------------------------
 #Functions
 
-
+'''
 def S(i,j,k):
     sed=((1.-g[k])*dat1[:,i,j]+g[k]*dat2[:,i,j])
-    ss=interp1d(dat3, sed, bounds_error=False,fill_value=0, kind='linear')
-    sed=ss(RFull)
+    #ss=interp1d(dat3, sed, bounds_error=False,fill_value=0, kind='linear')
+    sed=np.interp(RFull,dat3,sed,0,0)
+    #sed=ss(RFull)
     #sed=sed*Lsol*(np.sqrt(integrate.trapz(sed,RFullnu)**2))**-1  #Normaliser
     sed=np.array(sed)
     return sed
+'''
 #------------------------------------------------------------------------------
 
 assert len(sfx)==len(FILTERS)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
@@ -168,7 +170,8 @@ def galproc(galaxy):
     for i,obj in enumerate(dat1[0,:,0]):
         for j,obj in enumerate(dat1[0,0,:]):
             for k,obj in enumerate(g):
-                SED=S(i,j,k)*FL
+                SED=DL07_0[:,i,j,k]*FL
+                #SED=S(i,j,k)*FL
                 for p,obj in enumerate(sfx):
                     DL07[p,i,j,k]=convolver(RFullred,SED,FILTERS[p][0],FILTERS[p][1],sfx[p])
 
@@ -418,9 +421,6 @@ def galproc(galaxy):
     reddest_flux=reddest_flux[deltaCHI<1.3]
 
 
-
-    #print(np.std(np.log10(reddest_flux)))
-    #sys.exit()
     x = np.arange(-2, 2, .1)
     scatt = stats.norm.pdf(x,scale=0.3)
     scatt /= np.sum(scatt)

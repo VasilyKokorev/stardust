@@ -120,6 +120,22 @@ DG_ratio=0.01 #Template specific dust-to-gas ratio, see DL07 for more details.
 
 
 dat3=lam[0].data
+
+
+def S(i,j,k):
+    sed=((1.-g[k])*dat1[:,i,j]+g[k]*dat2[:,i,j])
+    ss=interp1d(np.log10(dat3), np.log10(sed), bounds_error=False,fill_value='extrapolate', kind='linear')
+    sed=10**ss(np.log10(RFull))
+    sed=np.array(sed)
+    return sed
+
+DL07_0=np.zeros((len(RFull),len(dat1[0,:,0]),len(dat1[0,0,:]),len(g)))
+
+for i,obj in enumerate(dat1[0,:,0]):
+    for j,obj in enumerate(dat1[0,0,:]):
+        for k,obj in enumerate(g):
+            DL07_0[:,i,j,k]=S(i,j,k)
+
 #==============================================================================
 
 print('Templates Imported')

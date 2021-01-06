@@ -110,7 +110,7 @@ if verbose>0:
 
 
 
-'If your dataset contains some exotic bands, i.e. continuum from a line input the information here'
+'If your dataset contains some additional bands, i.e. continuum from a line input the information here'
 'You also have to specify the observed wavelength columns'
 
 if extra_bands:
