@@ -30,7 +30,7 @@ pi=np.pi
 
 DATA=Table.read(f'{cat_name}', memmap=True)
 
-#DATA=DATA[DATA['ID_FIR']==641953]
+#DATA=DATA[DATA['ID']==641953]
 
 
 print(f'Read a catalogue with {len(DATA)} objects')
@@ -208,7 +208,7 @@ if save_covar:
 
 if save_table:
     outputnames=['ID','LIR_total','eLIR_total','MD',
-    'eMD','z','chi2','f_agn','efagn','lastdet','ztype','MG','eMG',
+    'eMD','z','chi2','f_agn','efagn','lastdet','MG','eMG',
     'deltaGDR','attempts','Mstar','fgas','fgas_FMR','Lir_med',
     'eLir68','Mdust_med','eMdust68','Umin','qpah','gamma','U','sU',
     'Lagn','eLagn','Lir_draine','eLir_draine']

@@ -272,6 +272,18 @@ def radio_slope(z,LIR,dl):
     A=S3*(10**5)**alpha
     return A
 
+def radio_slope_delv(z,LIR,Mstar,dl):
+    alpha=-0.75
+    dl=(dl*u.cm).to(u.m)
+    A=(1+z)
+    B=np.log10(Mstar)-10
+    q=2.646*A**(-0.023)-B*0.148
+    L14=(10**(np.log10(LIR*(3.839*10**26)/(3.75*10**12))-q))*u.W/u.Hz
+    S3=L14*(1+z)**(alpha+1)*(4*np.pi*dl**2)**-1*(3/1.4)**alpha
+    S3=S3.to(u.mJy).value
+    A=S3*(10**5)**alpha
+    return A
+
 
 def chi_vectors(A,solutions,N=10**3):
     vectors=[]

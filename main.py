@@ -576,8 +576,8 @@ def galproc(galaxy):
     if save_sed:
 
         def rad_flux(lam):
-            alpha=-0.7
-            return radio_slope(z,Lir_total,lum_dist)*lam**(-alpha)
+            alpha=-0.75
+            return radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
 
         if radio:
             RADIO=rad_flux(RFull*(1.+z))
@@ -606,9 +606,10 @@ def galproc(galaxy):
 
         #radio_points[1]=0.056852432
         #e_radio_points[1]=0.029326304000
+
         def rad_flux(lam):
-            alpha=-0.7
-            return radio_slope(z,Lir_total,lum_dist)*lam**(-alpha)
+            alpha=-0.75
+            return radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
 
         #print('F10cm',rad_flux(10**5),'mJy')
         #print('F20cm',rad_flux(2*10**5),'mJy')
@@ -626,14 +627,14 @@ def galproc(galaxy):
             TOTAL=SF+AGN+IR
 
         #radio_bands=np.array([0.1,0.2])*10**6
-        #radio_points=np.array([0.00055153, 0.0146874])
-        #e_radio_points=np.array([0.00277811, 0.00711859])
+        #radio_points=np.array([0.0247, 0.05685243200000001])
+        #e_radio_points=np.array([0.0029, 0.029326304000000004])
+
         plt.fill_between(RFull*(1.+z),0,SF,color='royalblue',alpha=0.2,label='Stellar')
         plt.fill_between(RFull*(1.+z),0,AGN,color='g',alpha=0.2,label='AGN')
         plt.fill_between(RFull*(1.+z),0,IR,color='maroon',alpha=0.2,label='Dust')
 
         plt.plot(RFull*(1.+z),TOTAL,'k',label='Total',lw=3,alpha=0.6,zorder=10)
-
 
         #plt.plot(wav_ar,np.sum(nnsol*bestfit.T,axis=1),'bo')
 
@@ -641,10 +642,11 @@ def galproc(galaxy):
 
         plt.errorbar(wav_ar[points],flux[points],yerr=flux_e_orig[points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
         plt.scatter(wav_ar[~points],(flux+3*flux_e_orig)[~points],marker=r'$\downarrow$',s=300,color='red',zorder=11)
+
         #if radio:
-        #    points_radio=((radio_points/e_radio_points)>=3)
-        #    plt.errorbar(radio_bands[points_radio],radio_points[points_radio],yerr=e_radio_points[points_radio],color='blue',fmt='o',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
-        #    plt.scatter(radio_bands[~points_radio],(radio_points+3*e_radio_points)[~points_radio],marker=r'$\downarrow$',s=300,color='b',zorder=11)
+           #points_radio=((radio_points/e_radio_points)>=3)
+           #plt.errorbar(radio_bands[points_radio],radio_points[points_radio],yerr=e_radio_points[points_radio],color='blue',fmt='o',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
+           #plt.scatter(radio_bands[~points_radio],(radio_points+3*e_radio_points)[~points_radio],marker=r'$\downarrow$',s=300,color='b',zorder=11)
 
 
         plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
@@ -658,8 +660,6 @@ def galproc(galaxy):
         ylim(10**-4,10**3)
         xlim(.5,10**5.7)
         grid(alpha=0.4)
-        #ylim(10**-5,10**4)
-        #xlim(.1,10**5.7)
         yscale('log')
         xscale('log')
         plt.tight_layout()
@@ -678,7 +678,7 @@ def galproc(galaxy):
         print('------------------------------------------')
 
     R=np.array([int(P[galaxy_index,0]),Lir_total,eLir_total,Mdust,eMD,z,chi2red_nnls,fagn,efagn,
-    lastdet,ztype[galaxy_index],Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
+    lastdet,Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
     Mgas/Mstar,Lir_med,Lir_med_err,Mdust_med,Mdust_med_err,Umin[minsol[0]],minsol[1],
     g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine])
     nnsol=np.array(nnsol)
@@ -687,17 +687,25 @@ def galproc(galaxy):
 
     if save_table:
         att=0
+        with lock:
+        #lock.acquire()
+            t0=Table.read(table_out)
+            t0.add_row(R)
+            t0.write(table_out,overwrite=True)
+        #lock.release()
+        '''
         while att<100:
             try:
                 time.sleep(np.random.uniform(1,3))
                 t0=Table.read(table_out)
                 t0.add_row(R)
                 t0.write(table_out,overwrite=True)
+                lock.release()
                 break
             except:
                 att+=1
                 time.sleep(3)
-
+        '''
 
 
     return None
@@ -713,12 +721,13 @@ if not multithread:
 
 objects=range(len(G[:,0]))
 from multiprocessing import Pool
-from multiprocessing import Process
+from multiprocessing import Process, Lock
 import multiprocessing
 
 
 if multithread:
     print('Begin multithreading')
+    lock = Lock()
     pool = Pool(multiprocessing.cpu_count())
     print(multiprocessing.cpu_count(),'threads utilised')                    # Create a multiprocessing Pool
     mp_out= np.array(pool.map(galproc,objects))
