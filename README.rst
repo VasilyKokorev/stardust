@@ -35,4 +35,4 @@ See the `quickstart guide <https://github.com/VasilyKokorev/ctf/blob/master/docs
 Contacts:
 ~~~~~~
 
-Vasily Kokorev: @VasilyKokorev / vasily.kokorev.astro@gmail.com
+Vasily Kokorev: vasily.kokorev.astro@gmail.com
