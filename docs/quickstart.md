@@ -67,4 +67,4 @@ Missing photometry/redshift etc. should have a value of **-99**.
 
 Navigate to the [init.py](https://github.com/VasilyKokorev/ctf/blob/master/config.py) and provide the paths for the input catalogue, bands and param files, as well as a path to the output directory.
 
-run ``main.py``
+run ``main.py`` with **Python 3.6** or above.
