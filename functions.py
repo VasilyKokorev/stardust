@@ -131,16 +131,6 @@ def integrate_filter(sedx,sedy,lam,T,scale=1., z=0):
         return temp_int
 
 
-
-
-
-
-def add_text_to_ax(x_coord, y_coord, string, ax, fontsize=12, color='k',weight='normal'):
-    """ Shortcut to add text to an ax with proper font. Relative coords."""
-    ax.text(x_coord, y_coord, string, family='monospace', fontsize=fontsize,
-            transform=ax.transAxes, verticalalignment='top', color=color,weight=weight)
-    return None
-
 def find_nearest(array, value):
     n = [abs(i-value) for i in array]
     idx = n.index(min(n))

@@ -1,9 +1,9 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='/Users/vasily/Documents/PhD/Projects/release/data/goods.fits'
+cat_name=''
 
-bands_file='/Users/vasily/Documents/PhD/Projects/release/ctf/configs/goods.bands'
-param_file='/Users/vasily/Documents/PhD/Projects/release/ctf/configs/goods.param'
+bands_file=''
+param_file=''
 
 extra_bands_file=''
 
@@ -13,7 +13,7 @@ extra_bands_file=''
 #===============================================================================
 PATH = '/Users/vasily/Documents/PhD/Projects/release/output/'
 
-output_name='goods_070121' #Name of output table
+output_name='' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -25,18 +25,18 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 'GENERAL SETTINGS'
 #===============================================================================
 flux_unit=''
-multithread=True
+multithread=False
 verbose=1 # Allowed 0,1,2
 extra_bands=False
 
 use_cold_dl=True
 
-diagplot=False
+diagplot=True
 radio=True
 
 save_fig=False
 save_table=True
-save_sed=True
+save_sed=False
 save_covar=False
 
 impose_cut=False

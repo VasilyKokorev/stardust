@@ -33,23 +33,7 @@ timer_start=time.time()
 
 from init import *
 from config import *
-#----------------------------------------
-#Loading Data
-
 #--------------------------------------------------------------------------
-#Functions
-
-'''
-def S(i,j,k):
-    sed=((1.-g[k])*dat1[:,i,j]+g[k]*dat2[:,i,j])
-    #ss=interp1d(dat3, sed, bounds_error=False,fill_value=0, kind='linear')
-    sed=np.interp(RFull,dat3,sed,0,0)
-    #sed=ss(RFull)
-    #sed=sed*Lsol*(np.sqrt(integrate.trapz(sed,RFullnu)**2))**-1  #Normaliser
-    sed=np.array(sed)
-    return sed
-'''
-#------------------------------------------------------------------------------
 
 assert len(sfx)==len(FILTERS)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
 
@@ -59,12 +43,7 @@ print('Photometry range ok')
 #---------------------------------------------------------
 #Import templates
 from template_importer import *
-
 #---------------------------------------------------------
-#Convolution with filters is done here
-#First choose the galaxy from gal list and define z
-
-
 def galproc(galaxy):
     galaxy_index=galaxy
     if verbose:
@@ -151,12 +130,10 @@ def galproc(galaxy):
 
 
     #==========================================================================
-    #SYNTHETIC PHOTOMETRY
+    'Synthetic photometry'
     timer_synphot=time.time()
 
-    '''Create empty arrays to fill in'''
-
-    #DL07
+    'DL07'
     DL07=np.zeros((len(sfx),len(dat1[0,:,0]),len(dat1[0,0,:]),len(g)))
     agn_c=np.zeros((len(sfx),len(agn[:,0])))
     GB_T=np.zeros((len(sfx),len(GB[:,0])))
@@ -171,7 +148,6 @@ def galproc(galaxy):
         for j,obj in enumerate(dat1[0,0,:]):
             for k,obj in enumerate(g):
                 SED=DL07_0[:,i,j,k]*FL
-                #SED=S(i,j,k)*FL
                 for p,obj in enumerate(sfx):
                     DL07[p,i,j,k]=convolver(RFullred,SED,FILTERS[p][0],FILTERS[p][1],sfx[p])
 
@@ -182,7 +158,7 @@ def galproc(galaxy):
                     for p,obj in enumerate(sfx_extra):
                         DL07_ex[p,i,j,k]=convolver(RFullred,SED,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
 
-    #AGN
+    'AGN'
 
     for i,obj in enumerate(agn[:,0]):
         for p,obj in enumerate(sfx):
@@ -191,7 +167,7 @@ def galproc(galaxy):
         if extra_bands:
             for p,obj in enumerate(sfx_extra):
                 agn_c_ex[p,i]=convolver(RFullred,agn[i,:],filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
-    #GB
+    'Optical'
 
     GB_T=np.zeros((len(sfx),len(GB[:,0])))
     for i,obj in enumerate(GB[:,0]):
@@ -318,6 +294,7 @@ def galproc(galaxy):
 
 
     'Producing the covariance matrix from template matrix A, and solution nnsol'
+    '''
     try:
         cov = np.matrix(np.dot(C.T, C)).I.A
         covsam=np.random.multivariate_normal(nnsol_mask,cov,10**3)
@@ -330,7 +307,7 @@ def galproc(galaxy):
         nnsol_cov[:,covmask2]=covsam
     except:
         nnsol_cov=nnsol
-
+    '''
 
     #------------------------------------------------------------------
     #Functions
@@ -379,7 +356,7 @@ def galproc(galaxy):
     '''
     def LumIR(f,param):
         flux=f(*param)*10**-26
-        luminosity_v=((4*pi*lum_dist**2*flux*(1+z)**-1)*u.erg).si
+        luminosity_v=((4*pi*lum_dist**2*flux*(1.+z)**-1)*u.erg).si
         wavrange=[find_nearest(RFull,8),find_nearest(RFull,1000)+1]
         luminosity_v=luminosity_v[wavrange[0]:wavrange[1]]
         wavelength=((RFull[wavrange[0]:wavrange[1]]*(1.+0))*u.um).si
@@ -391,7 +368,6 @@ def galproc(galaxy):
     chi2red_nnls=chi2/(len(flux)-1)
     #---------------------------------------------------
     #Finding initial values for quantities of interest
-
     Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):])
     Lir_total=LumIR(full_template,nnsol)
     Lir_stellar=LumIR(stellar,nnsol[:steltemp])
@@ -414,16 +390,16 @@ def galproc(galaxy):
 
 
 
-    U=Lir_total/(125*Mdust)
+    U=Lir_draine/(125*Mdust)
 
     reddest_flux=DL07[-1,:,:,:].flatten()
     reddest_flux/=np.median(reddest_flux)
     reddest_flux=reddest_flux[deltaCHI<1.3]
 
 
-    x = np.arange(-2, 2, .1)
-    scatt = stats.norm.pdf(x,scale=0.3)
-    scatt /= np.sum(scatt)
+    #x = np.arange(-2, 2, .1)
+    #scatt = stats.norm.pdf(x,scale=0.3)
+    #scatt /= np.sum(scatt)
     dex_sigma=np.std(np.log10(reddest_flux))
 
 
@@ -492,8 +468,8 @@ def galproc(galaxy):
         Mdust_chi=[]
         for x,obj in enumerate(SOL_13[0,:]):
             Lir_chi.append(LumIR(full_template,SOL_13[:,x]))
-            Lir_draine_chi.append(LumIR(full_ir,SOL_13[(total-irtemp):,x]))
-            Mdust_chi.append(DGratio*SOL_13[-1,x]*b*(const.m_p/const.M_sun))
+            #Lir_draine_chi.append(LumIR(full_ir,SOL_13[(total-irtemp):,x]))
+            Mdust_chi.append(DG_ratio*SOL_13[-1,x]*b*(const.m_p/const.M_sun))
 
         Lir_chi=np.array(Lir_chi)
         Mdust_chi=np.array(Mdust_chi)
@@ -577,7 +553,12 @@ def galproc(galaxy):
 
         def rad_flux(lam):
             alpha=-0.75
-            return radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            output=radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            if Mstar<0:
+                output=lam*0.
+            else:
+                output=radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            return output
 
         if radio:
             RADIO=rad_flux(RFull*(1.+z))
@@ -597,19 +578,18 @@ def galproc(galaxy):
         textxpos=0.6
         textsep=0.08
 
-        #if radio:
-        #    radio_points=10**-3*np.array([DATA['FIR_10CM_FLUX'][galaxy_index],DATA['FIR_20CM_FLUX'][galaxy_index]])
-        #    e_radio_points=10**-3*np.array([DATA['FIR_10CM_FLUXERR'][galaxy_index],DATA['FIR_20CM_FLUXERR'][galaxy_index]])
-        #    radio_bands=np.array([10**5,2*10**5])
-        #    radio_points=np.array([DATA['f3g'][galaxy_index],DATA['f14g'][galaxy_index]])
-        #    e_radio_points=np.array([DATA['ef3g'][galaxy_index],DATA['ef14g'][galaxy_index]])
 
         #radio_points[1]=0.056852432
         #e_radio_points[1]=0.029326304000
 
         def rad_flux(lam):
             alpha=-0.75
-            return radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            output=radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            if Mstar<0:
+                output=lam*0.
+            else:
+                output=radio_slope_delv(z,Lir_total,Mstar,lum_dist)*lam**(-alpha)
+            return output
 
         #print('F10cm',rad_flux(10**5),'mJy')
         #print('F20cm',rad_flux(2*10**5),'mJy')
@@ -634,6 +614,7 @@ def galproc(galaxy):
         plt.fill_between(RFull*(1.+z),0,AGN,color='g',alpha=0.2,label='AGN')
         plt.fill_between(RFull*(1.+z),0,IR,color='maroon',alpha=0.2,label='Dust')
 
+
         plt.plot(RFull*(1.+z),TOTAL,'k',label='Total',lw=3,alpha=0.6,zorder=10)
 
         #plt.plot(wav_ar,np.sum(nnsol*bestfit.T,axis=1),'bo')
@@ -651,8 +632,6 @@ def galproc(galaxy):
 
         plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
         plt.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
-        #add_text_to_ax(0.05, 0.95-2*textsep, r'log($L_I$$_R$)={:.2f}'.format(np.log10(Lir_total)),ax=ax,fontsize=20, color='k')
-        #add_text_to_ax(0.05, 0.95-3*textsep, r'log($M_d$)={:.2f}'.format(np.log10(Mdust)),ax=ax,fontsize=20, color='k')
 
         ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
         xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
@@ -681,33 +660,22 @@ def galproc(galaxy):
     lastdet,Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
     Mgas/Mstar,Lir_med,Lir_med_err,Mdust_med,Mdust_med_err,Umin[minsol[0]],minsol[1],
     g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine])
+
     nnsol=np.array(nnsol)
 
 
 
     if save_table:
         att=0
-        with lock:
-        #lock.acquire()
-            t0=Table.read(table_out)
-            t0.add_row(R)
-            t0.write(table_out,overwrite=True)
-        #lock.release()
-        '''
-        while att<100:
-            try:
-                time.sleep(np.random.uniform(1,3))
+        if multithread:
+            with lock:
                 t0=Table.read(table_out)
                 t0.add_row(R)
                 t0.write(table_out,overwrite=True)
-                lock.release()
-                break
-            except:
-                att+=1
-                time.sleep(3)
-        '''
-
-
+        else:
+            t0=Table.read(table_out)
+            t0.add_row(R)
+            t0.write(table_out,overwrite=True)
     return None
 
 
@@ -729,7 +697,7 @@ if multithread:
     print('Begin multithreading')
     lock = Lock()
     pool = Pool(multiprocessing.cpu_count())
-    print(multiprocessing.cpu_count(),'threads utilised')                    # Create a multiprocessing Pool
+    print(multiprocessing.cpu_count(),'threads utilised')
     mp_out= np.array(pool.map(galproc,objects))
     mp_out=np.array(mp_out)
     print ('Code took',time.time()-timer_start, 's to run')
