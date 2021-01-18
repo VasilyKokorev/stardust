@@ -30,8 +30,6 @@ pi=np.pi
 
 DATA=Table.read(f'{cat_name}', memmap=True)
 
-#DATA=DATA[DATA['ID']==641953]
-
 print(f'Read a catalogue with {len(DATA)} objects')
 
 

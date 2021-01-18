@@ -1,9 +1,9 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name=''
+cat_name='/example/COSMOS_SDC2_example.fits'
 
-bands_file=''
-param_file=''
+bands_file='/example/example.bands'
+param_file='/example/example.param'
 
 extra_bands_file=''
 
@@ -11,9 +11,9 @@ extra_bands_file=''
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/output/'
+PATH = '/example/output/'
 
-output_name='' #Name of output table
+output_name='example' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -25,7 +25,7 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 'GENERAL SETTINGS'
 #===============================================================================
 flux_unit=''
-multithread=False
+multithread=True
 verbose=1 # Allowed 0,1,2
 extra_bands=False
 
@@ -36,7 +36,7 @@ radio=True
 
 save_fig=False
 save_table=True
-save_sed=False
+save_sed=True
 save_covar=False
 
 impose_cut=False
