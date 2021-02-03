@@ -218,6 +218,12 @@ def galproc(galaxy):
     agn_c=agn_c[sort]
 
 
+    #plt.plot(wav_ar,flux,'ro')
+    #plt.yscale('log')
+    #plt.xscale('log')
+    #plt.show()
+    #sys.exit()
+
     #-------------------------------------
     A=[]
     CHI=np.zeros_like(DL07[0,:,:,:])
@@ -684,16 +690,12 @@ objects=range(len(G[:,0]))
 if not multithread:
     for i,obj in enumerate(objects):
         galproc(i)
-    sys.exit()
-
-
-objects=range(len(G[:,0]))
-from multiprocessing import Pool
-from multiprocessing import Process, Lock
-import multiprocessing
 
 
 if multithread:
+    from multiprocessing import Pool
+    from multiprocessing import Process, Lock
+    import multiprocessing
     print('Begin multithreading')
     lock = Lock()
     pool = Pool(multiprocessing.cpu_count())
@@ -708,5 +710,8 @@ if save_table:
     #table_final=table_final[table_final['ID']!=0] #Remove placeholder row
     table_final=table_final[1:] #Remove placeholder row
     table_final.write(table_out,overwrite=True)
+
+if save_fig:
+    from plotter import *
 
 sys.exit()

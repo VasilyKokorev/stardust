@@ -112,9 +112,9 @@ if verbose>0:
 
 if extra_bands:
     xtra_bnds=np.loadtxt(extra_bands_file,dtype='str')
-    bands_extra=xtra_bnds[:,0].tolist()
-    err_bands_extra=xtra_bnds[:,1].tolist()
-    wavelength_extra=xtra_bnds[:,2].tolist()
+    wavelength_extra=xtra_bnds[:,0].tolist()
+    bands_extra=xtra_bnds[:,1].tolist()
+    err_bands_extra=xtra_bnds[:,2].tolist()
     if verbose==1:
         print(f'Added extra bands from {extra_bands_file}')
 #===============================================================================
@@ -146,6 +146,7 @@ else:
 G=np.array((np.array(DATA[band_names])).tolist())
 E=np.array((np.array(DATA[err_band_names])).tolist())
 W=np.tile(sfx,(len(G[:,0]),1))
+
 if extra_bands:
     G_ex=np.array((np.array(DATA[bands_extra])).tolist())
     E_ex=np.array((np.array(DATA[err_bands_extra])).tolist())
@@ -153,7 +154,6 @@ if extra_bands:
     G=np.concatenate((G,G_ex),axis=1)
     E=np.concatenate((E,E_ex),axis=1)
     W=np.concatenate((W,W_ex),axis=1)
-
 
 P=np.array((np.array(DATA[param_names])).tolist())
 
