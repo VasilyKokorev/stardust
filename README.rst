@@ -19,8 +19,8 @@ Not required. Just git pull the software to a desired directory.
 
     .. code:: bash
     
-        $ git clone git@github.com:VasilyKokorev/ctf.git
-        $ cd ctf
+        $ git git@github.com:VasilyKokorev/stardust.git
+        $ cd stardust
   
 Usage:
 ~~~~~~
