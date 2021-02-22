@@ -33,6 +33,9 @@ timer_start=time.time()
 
 from init import *
 from config import *
+
+if save_table:
+    make_output_table(table_out)
 #--------------------------------------------------------------------------
 
 assert len(sfx)==len(FILTERS)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
@@ -74,8 +77,8 @@ def galproc(galaxy):
 
 
 
-    flux_i=G[galaxy_index,:]
-    flux_i_e=E[galaxy_index,:]
+    flux_i=G[galaxy_index,:]*10**-3
+    flux_i_e=E[galaxy_index,:]*10**-3
     flux_i_e_orig=np.copy(flux_i_e)
 
     snr=flux_i/flux_i_e
@@ -394,7 +397,43 @@ def galproc(galaxy):
 
     Mdust=DG_ratio*Mgas_nnls
 
+    #---
+    '''
+    t_param=Table.read('/Users/vasily/Desktop/fsps_QSF_12_v3.param.fits')
 
+    dl=cosmo.luminosity_distance(z).to(u.cm)
+    conv=((1*u.mJy).to(u.erg/u.s/u.cm**2/u.Hz))*4*np.pi*dl**2/(1+z)
+
+    #coeffs_rest=b1*nnsol[:12]*conv
+    #coeffs_rest = np.array(coeffs_rest)
+    #mass=3*10**8*np.dot(coeffs_rest,t_param['mass'])
+
+    opt_mjy=((b1*nnsol[:(steltemp)])*u.mJy).to(u.erg/u.s/u.cm**2/u.Hz)
+    opt_lnu=opt_mjy*4*np.pi*dl**2/(1+z)
+    mass=np.dot(opt_lnu,t_param['mass'])
+    print(np.log10(mass.value/(2*10**30)))
+    print('cat_mass',np.log10(Mstar))
+    #print('comp mass',np.log10(mass))
+    #print('ratio',mass/Mstar)
+
+    fnu_units = u.erg/u.s/u.cm**2/u.Hz
+    mJy_to_cgs = u.mJy.to(u.erg/u.s/u.cm**2/u.Hz)
+    fnu_scl = 1*mJy_to_cgs
+
+    template_fnu_units=(1*u.solLum / u.Hz)
+    to_physical = fnu_scl*fnu_units*4*np.pi*dl**2/(1+z)
+    to_physical /= (1*template_fnu_units).to(u.erg/u.second/u.Hz)
+
+    coeffs_rest = (b1*nnsol[:12].T*to_physical).T
+
+    # Remove unit (which should be null)
+    coeffs_rest = np.array(coeffs_rest)
+
+    mass = coeffs_rest.dot(t_param['mass'])
+    print(np.log10(mass))
+    print('cat_mass',np.log10(Mstar))
+    '''
+    #---
 
     U=Lir_draine/(125*Mdust)
 
@@ -402,11 +441,8 @@ def galproc(galaxy):
     reddest_flux/=np.median(reddest_flux)
     reddest_flux=reddest_flux[deltaCHI<1.3]
 
+    red_sigma=Mdust*((10**np.std(np.log10(reddest_flux)))-1)
 
-    #x = np.arange(-2, 2, .1)
-    #scatt = stats.norm.pdf(x,scale=0.3)
-    #scatt /= np.sum(scatt)
-    dex_sigma=np.std(np.log10(reddest_flux))
 
 
     #Metallicity from Manucci+10 eq5
@@ -423,7 +459,7 @@ def galproc(galaxy):
     Lir_total_cov=[]
     Lir_draine_cov=[]
     eLir_total=eLir_draine=eLagn=eMD=eMG=efagn=-99
-    max_allowed = 2
+    max_allowed = 5
     attempt = 0
     loop_time_start=time.time()
     while (eLir_total<1.) or np.isnan(eLir_total) or (eMD<1.) or np.isnan(eMD):
@@ -443,7 +479,6 @@ def galproc(galaxy):
             nnsol_cov[:,covmask2]=covsam
         except:
             break
-
 
         try:
             nnsol_cov_sum=np.sum(nnsol_cov[:,total-irtemp:],axis=1)
@@ -502,7 +537,10 @@ def galproc(galaxy):
 
     CHI_13=CHI_f[CHImask]
 
-    eMD=(eMD**2+(10**dex_sigma)**2)**0.5
+    if eMD>0:
+        eMD=(eMD**2+red_sigma**2)**0.5
+    else:
+        eMD=red_sigma
 
     #cov_data=np.array([CHI_13,Lir_chi,Lir_draine_chi,Mdust_chi])
     #cov_names=['chi2','Lir_total','Lir_draine','MD',]
@@ -650,8 +688,8 @@ def galproc(galaxy):
         plt.tight_layout()
 
 
-        if save_fig:
-            plt.savefig(figloc + str(int(P[galaxy_index,0])) + ".pdf")
+        #if save_fig:
+            #plt.savefig(figloc + str(int(P[galaxy_index,0])) + ".pdf")
         if diagplot:
             show()
 

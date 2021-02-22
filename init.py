@@ -30,6 +30,8 @@ pi=np.pi
 
 DATA=Table.read(f'{cat_name}', memmap=True)
 
+DATA=DATA[:20]
+
 print(f'Read a catalogue with {len(DATA)} objects')
 
 
@@ -203,18 +205,9 @@ if save_covar:
         pass
 
 
-if save_table:
-    outputnames=['ID','LIR_total','eLIR_total','MD',
-    'eMD','z','chi2','f_agn','efagn','lastdet','MG','eMG',
-    'deltaGDR','attempts','Mstar','fgas','fgas_FMR','Lir_med',
-    'eLir68','Mdust_med','eMdust68','Umin','qpah','gamma','U','sU',
-    'Lagn','eLagn','Lir_draine','eLir_draine']
+#if save_table:
+    #make_output_table()
 
-    dtype=[float]*len(outputnames)
-    dtype[0]=int
-
-    table_0=Table(np.zeros(len(outputnames)), names=outputnames,dtype=dtype) #Make empty table
-    table_0.write(table_out,overwrite=True)
 
 #===============================================================================
 print('End Config')

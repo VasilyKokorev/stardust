@@ -1,9 +1,9 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='example/COSMOS_SDC2_example.fits'
+cat_name='/Users/vasily/Documents/Tables/weirdguys_cls.fits'
 
-bands_file='example/example.bands'
-param_file='example/example.param'
+bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2020_jw.bands'
+param_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2020_jw.param'
 
 extra_bands_file=''
 
@@ -11,9 +11,9 @@ extra_bands_file=''
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/output/fv/aspecs/'
+PATH = '/Users/vasily/Documents/PhD/Projects/release/output/jw_test/'
 
-output_name='aspecs' #Name of output table
+output_name='jw_220221' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -25,21 +25,21 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 'GENERAL SETTINGS'
 #===============================================================================
 flux_unit=''
-multithread=False
+multithread=1
 verbose=1 # Allowed 0,1,2
-extra_bands=False
+extra_bands=0
 
-use_cold_dl=True
+use_cold_dl=1
 
-diagplot=True
-radio=True
+diagplot=1
+radio=1
 
-save_fig=False
-save_table=False
-save_sed=False
-save_covar=False
+save_fig=1
+save_table=1
+save_sed=1
+save_covar=0
 
-impose_cut=False
+impose_cut=0
 #===============================================================================
 
 'TEMPLATE PARAMETERS'
