@@ -1,4 +1,4 @@
-``CTF``: Composite Template Fitting Software
+``STARDUST``: Composite Template Fitting Software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This repository provides an SED fitting tool, primarily focused on the IR part of the spectrum.
 
@@ -19,8 +19,8 @@ Not required. Just git pull the software to a desired directory.
 
     .. code:: bash
     
-        $ git clone git@github.com:VasilyKokorev/ctf.git
-        $ cd ctf
+        $ git git@github.com:VasilyKokorev/stardust.git
+        $ cd stardust
   
 Usage:
 ~~~~~~
