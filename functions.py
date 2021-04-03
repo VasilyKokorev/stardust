@@ -252,8 +252,7 @@ def SFRMS_Schreiber(z,Ms): #Schreiber Main Sequence input Chabrier output Chabri
     return 0.63*(10**logSFR) #Output sfr
 
 
-def radio_slope(z,LIR,dl):
-    alpha=-0.7
+def radio_slope_delhz(z,LIR,dl,alpha):
     dl=(dl*u.cm).to(u.m)
     q=2.88*(1+z)**(-0.19)
     L14=(10**(np.log10(LIR*(3.839*10**26)/(3.75*10**12))-q))*u.W/u.Hz
@@ -262,8 +261,7 @@ def radio_slope(z,LIR,dl):
     A=S3*(10**5)**alpha
     return A
 
-def radio_slope_delv(z,LIR,Mstar,dl):
-    alpha=-0.75
+def radio_slope_delv(z,LIR,Mstar,dl,alpha):
     dl=(dl*u.cm).to(u.m)
     A=(1+z)
     B=np.log10(Mstar)-10
@@ -273,7 +271,31 @@ def radio_slope_delv(z,LIR,Mstar,dl):
     S3=S3.to(u.mJy).value
     A=S3*(10**5)**alpha
     return A
+'''
+def rad_flux(lam,method='delv20',alpha=-0.75,use_K=False):
 
+    #Calculate the radio contribution:
+    #Two methods available:
+    #Delvecchio+20, with Lir and Mstar dependence - delv20
+    #Delhaize+17, only with Lir dependence - delhz17
+    #If no stellar mass available, can use the K-band prediction instead - use_K
+
+    if method=='delv20':
+        slope=radio_slope_delv
+        if Mstar<0:
+            if use_K:
+                output=slope(z,Lir_total,mass_K,lum_dist,alpha)*lam**(-alpha)
+            else:
+                print('Cannot use Delvecchio+20 radio method, without M*')
+                output=lam*0.
+        else:
+            output=slope(z,Lir_total,Mstar,lum_dist,alpha)*lam**(-alpha)
+
+    elif method=='delhz17':
+        slope=radio_slope_delhz
+        output=slope(z,Lir_total,lum_dist,alpha)*lam**(-alpha)
+    return output
+'''
 
 def chi_vectors(A,solutions,N=10**3):
     vectors=[]
@@ -337,7 +359,7 @@ def make_output_table(table_out):
                  'eMD','z','chi2','f_agn','efagn','lastdet','MG','eMG',
                  'deltaGDR','attempts','Mstar','fgas','fgas_FMR','Lir_med',
                  'eLir68','Mdust_med','eMdust68','Umin','qpah','gamma','U','sU',
-                 'Lagn','eLagn','Lir_draine','eLir_draine']
+                 'Lagn','eLagn','Lir_draine','eLir_draine','mass','mass_K']
 
     dtype=[float]*len(outputnames)
     dtype[0]=int
@@ -345,3 +367,21 @@ def make_output_table(table_out):
     table_0=Table(np.zeros(len(outputnames)), names=outputnames,dtype=dtype) #Make empty table
     table_0.write(table_out,overwrite=True)
     return None
+
+def get_qso_templates():
+    qso_templ1=Table.read('templates/QSO/shen2016_ext_Av0.0.fits')
+    qso_templ2=Table.read('templates/QSO/shen2016_ext_Av0.1.fits')
+    qso_templ3=Table.read('templates/QSO/shen2016_ext_Av0.2.fits')
+    qso_templ4=Table.read('templates/QSO/shen2016_ext_Av0.3.fits')
+    qso_templ5=Table.read('templates/QSO/shen2016_ext_Av0.4.fits')
+
+    qso_wave=qso_templ1['wave']
+
+    QSO=np.zeros((5,len(qso_wave)))
+
+    QSO[0,:]=qso_templ1['flux']
+    QSO[1,:]=qso_templ2['flux']
+    QSO[2,:]=qso_templ2['flux']
+    QSO[3,:]=qso_templ3['flux']
+    QSO[0,:]=qso_templ4['flux']
+    return QSO,qso_wave

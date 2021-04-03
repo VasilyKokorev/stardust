@@ -26,7 +26,11 @@ from filter_importer import *
 
 
 for i,_ in enumerate(P[:,0]):
-    sed_file=Table.read(f'{sedloc}{int(_)}.fits',memmap=True)
+    try:
+        sed_file=Table.read(f'{sedloc}{int(_)}.fits',memmap=True)
+    except:
+        print(f'ID{_} not found')
+        continue
 
     fig= plt.figure(figsize=(10,5))
     ax = fig.add_subplot(1,1,1)
@@ -48,7 +52,7 @@ for i,_ in enumerate(P[:,0]):
     ax.plot(wave,TOTAL,'k',label='Total',lw=3,alpha=0.6,zorder=10)
 
     ax.text(0.02, 0.85,'ID '+str(int(_)), color='k',fontsize=20,transform=ax.transAxes)
-    ax.text(0.02, 0.75,r'z={:.2f}'.format(P[i,1]), color='k',fontsize=20,transform=ax.transAxes)
+    ax.text(0.02, 0.75,r'$z$={:.2f}'.format(P[i,1]), color='k',fontsize=20,transform=ax.transAxes)
 
     flux=G[i,:]
     flux_e=E[i,:]
@@ -63,10 +67,16 @@ for i,_ in enumerate(P[:,0]):
     ax.set_ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
     ax.set_xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
     ax.legend(fontsize=12)
-    ax.set_ylim(10**-4,10**3)
-    ax.set_xlim(.5,10**5.7)
+    #ax.set_ylim(10**-4,10**3)
+    #ax.set_xlim(.5,10**5.7)
+    ax.set_ylim(10**-5,10**3)
+    ax.set_xlim(.1,10**5.7)
+    #ax.set_xlim(0.9,1e4)
+    #ax.set_ylim(10**-3,10)
     ax.grid(alpha=0.4)
     ax.set_yscale('log')
     ax.set_xscale('log')
+
     plt.tight_layout()
     plt.savefig(f'{figloc}/{_}.pdf')
+    plt.clf()

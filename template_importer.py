@@ -26,6 +26,7 @@ import matplotlib.mlab as mlab
 import sys
 
 from config import *
+from functions import *
 
 '''
 Defining constants and wavelength range for all templates
@@ -38,7 +39,7 @@ RFullnu=c*(RFull*10**-6)**-1
 ltn=(RFull**2)*(3*10**8)**-1
 #==============================================================================
 diagnostic_optical=False
-OT=Table.read('templates/GB.fits')
+OT=Table.read('templates/GB_updated.fits')
 OT_arr = (np.lib.recfunctions.structured_to_unstructured(OT.as_array())).T
 
 OT_arr_flux=OT_arr[1:,:]
@@ -48,6 +49,39 @@ for i,_ in enumerate(OT_arr_flux[:,0]):
     f=interp1d(OT_arr[0,:],OT_arr_flux[i,:],bounds_error=False,fill_value=0,kind='linear')
     GB[i,:]=f(RFull)
 
+if qso:
+    #qso_templ=Table.read('templates/shen2016_ext.fits')
+    #qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    #qso=qso_func(RFull)*ltn
+    GB[:,:]*=0
+    '''
+    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.0.fits')
+    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    qso=qso_func(RFull)*ltn
+    GB[0,:]=qso
+    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.1.fits')
+    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    qso=qso_func(RFull)*ltn
+    GB[1,:]=qso
+    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.2.fits')
+    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    qso=qso_func(RFull)*ltn
+    GB[2,:]=qso
+    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.3.fits')
+    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    qso=qso_func(RFull)*ltn
+    GB[3,:]=qso
+    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.4.fits')
+    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
+    qso=qso_func(RFull)*ltn
+    GB[4,:]=qso
+    '''
+    QSO,qso_wave=get_qso_templates()
+    for i,_ in enumerate(QSO[:,0]):
+        qso_func=interp1d(qso_wave*10**-4,QSO[i,:],bounds_error=False,fill_value=0,kind='cubic')
+        qso=qso_func(RFull)*ltn
+        GB[i,:]=qso
+
 
 if diagnostic_optical:
     for i,_ in enumerate(GB[:,0]):
@@ -56,6 +90,7 @@ if diagnostic_optical:
         xscale('log')
     show()
 #==============================================================================
+
 
 AGN_l=Table.read('templates/AGN/LoLum_AGN_GM.fits')
 AGN_h=Table.read('templates/AGN/HiLum_AGN_GM.fits')
@@ -70,6 +105,8 @@ agn_low=agn_l(RFull)*ltn
 agn=np.zeros((2,len(agn_low)))
 agn[0,:]=agn_high
 agn[1,:]=agn_low
+
+
 
 #==============================================================================
 '''DL07 CONFIGURATION PANEL'''

@@ -30,7 +30,9 @@ pi=np.pi
 
 DATA=Table.read(f'{cat_name}', memmap=True)
 
-DATA=DATA[:20]
+#subset=Table.read('/Users/vasily/Documents/PhD/Projects/release/output/test_igm_K/mass_test_igm_K.fits')
+
+#DATA=DATA[np.isin(DATA['ID'],subset['ID'])]
 
 print(f'Read a catalogue with {len(DATA)} objects')
 
@@ -124,6 +126,7 @@ if extra_bands:
 steltemp=12 #Default value
 agntemp=2 #Default value
 irtemp=1
+
 total=steltemp+agntemp+irtemp
 
 detection_threshold=3 #In sigma
@@ -207,7 +210,6 @@ if save_covar:
 
 #if save_table:
     #make_output_table()
-
 
 #===============================================================================
 print('End Config')

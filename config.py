@@ -1,9 +1,9 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='/Users/vasily/Documents/Tables/weirdguys_cls.fits'
+cat_name='/Users/vasily/Documents/Tables/cosmos2020_phot_zout.fits'
 
-bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2020_jw.bands'
-param_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2020_jw.param'
+bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/jw/cosmos2020.bands'
+param_file='/Users/vasily/Documents/PhD/Projects/release/configs/jw/cosmos2020.param'
 
 extra_bands_file=''
 
@@ -11,9 +11,9 @@ extra_bands_file=''
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/output/jw_test/'
+PATH = '/Users/vasily/Documents/PhD/Projects/release/output//'
 
-output_name='jw_220221' #Name of output table
+output_name='010421' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -24,7 +24,7 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 
 'GENERAL SETTINGS'
 #===============================================================================
-flux_unit=''
+flux_unit='uJy'
 multithread=1
 verbose=1 # Allowed 0,1,2
 extra_bands=0
@@ -33,6 +33,7 @@ use_cold_dl=1
 
 diagplot=1
 radio=1
+radio_method='delv20'
 
 save_fig=1
 save_table=1
@@ -42,10 +43,16 @@ save_covar=0
 impose_cut=0
 #===============================================================================
 
+'ADVANCED SETTINGS'
+#===============================================================================
+uncert_scale=0.05
+qso=0
+igm_switch=1
+#===============================================================================
 'TEMPLATE PARAMETERS'
 #===============================================================================
 'SWITCH ON/OFF different components'
-dust_switch=1
-agn_switch=1
+dust_switch=0
+agn_switch=0
 stellar_switch=1
 #===============================================================================
