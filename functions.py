@@ -356,10 +356,10 @@ def filter_cont(lmbd,w,dx):
 
 def make_output_table(table_out):
     outputnames=['ID','LIR_total','eLIR_total','MD',
-                 'eMD','z','chi2','f_agn','efagn','lastdet','MG','eMG',
+                 'eMD','z','chi2_red','f_agn','efagn','lastdet','MG','eMG',
                  'deltaGDR','attempts','Mstar','fgas','fgas_FMR','Lir_med',
                  'eLir68','Mdust_med','eMdust68','Umin','qpah','gamma','U','sU',
-                 'Lagn','eLagn','Lir_draine','eLir_draine','mass','mass_K']
+                 'Lagn','eLagn','Lir_draine','eLir_draine','mass','e_mass','mass_K','chi2','nfilt']
 
     dtype=[float]*len(outputnames)
     dtype[0]=int
@@ -385,3 +385,15 @@ def get_qso_templates():
     QSO[3,:]=qso_templ3['flux']
     QSO[0,:]=qso_templ4['flux']
     return QSO,qso_wave
+
+
+def convert_to_mjy(unit):
+    if unit=='mJy':
+        conv=1.
+    elif unit=='uJy':
+        conv=(u.uJy).to(u.mJy)
+    elif unit=='nJy':
+        conv=(u.nJy).to(u.mJy)
+    else:
+        sys.exit(f'Unrecognised unit - {unit}, accepted formats: uJy, mJy, nJy')
+    return conv

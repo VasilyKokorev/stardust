@@ -107,6 +107,13 @@ def galproc(galaxy):
     flux_e_orig=np.delete(flux_i_e_orig,mask,None)
     wav_ar=np.delete(wav_ar_i,mask,None)
 
+    nfilt=len(flux)
+
+
+    #return int(P[galaxy_index,0]),nfilt
+
+
+
     #Create extra filters and add them to the existing filter array
     if extra_bands:
         filt_extra=np.array(filter_cont(sfx_extra,5,0.2))
@@ -164,6 +171,7 @@ def galproc(galaxy):
                 SED=DL07_0[:,i,j,k]*FL*igm_factor
                 for p,obj in enumerate(sfx):
                     DL07[p,i,j,k]=convolver(RFullred,SED,FILTERS[p][0],FILTERS[p][1],sfx[p])
+                    #DL07[p,i,j,k]=integrate_filter(RFullred,SED,FILTERS[p][0],FILTERS[p][1])
 
 
 
@@ -171,12 +179,14 @@ def galproc(galaxy):
                 if extra_bands:
                     for p,obj in enumerate(sfx_extra):
                         DL07_ex[p,i,j,k]=convolver(RFullred,SED,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
+                        #DL07_ex[p,i,j,k]=integrate_filter(RFullred,SED,filt_extra[p][0],filt_extra[p][1],)
 
     'AGN'
 
     for i,obj in enumerate(agn[:,0]):
         for p,obj in enumerate(sfx):
             agn_c[p,i]=convolver(RFullred,agn[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
+            #agn_c[p,i]=integrate_filter(RFullred,agn[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
 
         if extra_bands:
             for p,obj in enumerate(sfx_extra):
@@ -186,11 +196,13 @@ def galproc(galaxy):
     GB_T=np.zeros((len(sfx),len(GB[:,0])))
     for i,obj in enumerate(GB[:,0]):
         for p,obj in enumerate(sfx):
-            GB_T[p,i]=convolver(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
+            #GB_T[p,i]=convolver(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
+            GB_T[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1])
 
         if extra_bands:
             for p,obj in enumerate(sfx_extra):
-                GB_T_ex[p,i]=convolver(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
+                #GB_T_ex[p,i]=convolver(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
+                GB_T_ex[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1])
 
 
 
@@ -211,8 +223,8 @@ def galproc(galaxy):
     (Re)Normalising Templates to perform the fit
     '''
     b=10**10*(const.M_sun/const.m_p)*dust_switch
-    b1=1#/np.mean(GB)*stellar_switch
-    b2=1/np.mean(agn)*agn_switch
+    b1=1.#/np.mean(GB)*stellar_switch
+    b2=1./np.mean(agn)*agn_switch
 
 
     #-------------------------------------
@@ -226,10 +238,13 @@ def galproc(galaxy):
     sort=np.argsort(wav_ar)
     flux=flux[sort]
     flux_e=flux_e[sort]
+    flux_e_orig=flux_e_orig[sort]
     wav_ar=wav_ar[sort]
     DL07=DL07[sort]
     GB_T=GB_T[sort]
     agn_c=agn_c[sort]
+
+
 
 
     #plt.plot(wav_ar,flux,'ro')
@@ -240,7 +255,10 @@ def galproc(galaxy):
 
     #-------------------------------------
     A=[]
-    CHI=np.zeros_like(DL07[0,:,:,:])
+    try:
+        CHI=np.zeros_like(DL07[0,:,:,:])
+    except:
+        return None
     SOL=np.zeros((15,len(DL07[0,:,0,0]),len(DL07[0,0,:,0]),len(DL07[0,0,0,:])))
 
     for i,obj in enumerate(GB_T[0,:]):
@@ -252,41 +270,114 @@ def galproc(galaxy):
     '''Can insert DL linear combination here'''
     A.append(0*agn_c[:,1]) #Adding a fake row as a placeholder for DL07
 
+    #---------------------------------------------------------------------------
+    minsol=np.array([0,0,0])
+
+    def stellar(*params): #Stellar template
+        params=np.array(params)
+        optt=params*np.array(GB.T)
+        optt=np.sum(optt,axis=1)
+        return b1*optt
 
 
+    def agnpl(*params):  #AGN template
+        params=np.array(params)
+        a=params*b2*agn[1:3,:].T
+        a=np.sum(a,axis=1)
+        return a
+
+
+    def full_ir(params,template): #IR template
+        params=np.array(params)
+        r=[]
+        r.append(S(template[0],template[1],template[2]))
+        r=np.array(r)
+        r=params*r.T
+        return b*FL*(np.sum(r,axis=1))
+
+
+    def full_template(params,template): #All combined
+        params=np.array(params)
+        s=stellar(params[:steltemp])
+        i=full_ir(params[total-irtemp:],template)
+        a=agnpl(params[steltemp:steltemp+agntemp])
+        return s+i+a
+
+    def full_template_ir(params,template): #All combined
+        params=np.array(params)
+        s=stellar(params[:steltemp])
+        i=full_ir(params[total-irtemp:],template)
+        a=agnpl(params[steltemp:steltemp+agntemp])
+        return i
+
+    '''
+    This computes LIR, given the template function and the solution vector
+    '''
+    def LumIR(f,param,template=minsol):
+        template=np.array(template)
+        flux=f(param,template)*10**-26
+        luminosity_v=((4*pi*lum_dist**2*flux*(1+z)**-1)*u.erg).si
+        wavrange=[find_nearest(RFull,8),find_nearest(RFull,1000)+1]
+        luminosity_v=luminosity_v[wavrange[0]:wavrange[1]]
+        wavelength=((RFull[wavrange[0]:wavrange[1]]*(1.+0))*u.um).si
+        Luminosity_IR=integrate.trapz((luminosity_v*c*wavelength**-2).value,wavelength.value)*(3.839*10**26)**-1
+        return Luminosity_IR
+    #---------------------------------------------------------------------------
     fit_start=time.time()
+
+    Lir_chi=[]
+    Lir_draine_chi=[]
+    Mdust_chi=[]
+    gamma_chi=[]
+    chi2_cov=[]
+    fpdr_chi=[]
+
+    ir_cntr=len(wav_ar[wav_ar>3.5])
+
+    chi2_opt_cov=[]
+
     for i1,obj in enumerate(dat1[0,:,0]):
         for i2,obj in enumerate(dat1[0,0,:]):
             for i3,obj in enumerate(g):
                 B=np.copy(A)
                 B[-1,:]=b*DL07[:,i1,i2,i3]
                 B=np.array(B)
+                C=np.copy(B)
                 B=B/flux_e
                 B=B.T
                 try:
                     nnsol, ier = sp.optimize.nnls(B,flux/flux_e)
                     SOL[:,i1,i2,i3]=nnsol
                     CHI[i1,i2,i3]=ier**2
+                    if save_covar:
+                        Lir_chi.append(LumIR(full_template,nnsol,template=[i1,i2,i3])) #Total LIR
+                        Lir_draine_chi.append(LumIR(full_template_ir,nnsol,template=[i1,i2,i3])) #LIR only for the DL07 template
+                        #Mdust_chi.append(DG_ratio*nnsol[-1]*b*(const.m_p/const.M_sun)) #Mdust
+                        gamma_chi.append(g[i3])
+                        fpdr_chi.append(f_pdr(g[i3],Umin[i1]))
+                        chi2_cov.append(ier**2)
+                        chi2_ir=np.sum(  ((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar>3.5]           )
+                        chi2_opt=np.sum(  ((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar<3.5]           )
+                        chi2_opt_cov.append(chi2_opt)
+                        print('IR',chi2_ir)
+                        print('OPT',chi2_opt)
+                        print('TOT',ier**2)
 
 
                 except:
                     nnsol = np.array([0.]*total)
+
                     ier=-99
 
 
-    for i1,obj in enumerate(dat1[0,:,0]):
-        for i2,obj in enumerate(dat1[0,0,:]):
-            for i3,obj in enumerate(g):
-                if CHI[i1,i2,i3]==np.amin(CHI):
-                    minsol=np.array([i1,i2,i3])
+    #Find the indices of the best fit solution
 
-
-
+    minsol=np.unravel_index(np.argmin(CHI),CHI.shape)
     nnsol=SOL[:,minsol[0],minsol[1],minsol[2]]
     chi2=CHI[minsol[0],minsol[1],minsol[2]]
 
 
-
+    #Create matrix with best-fit template
     A[-1]=b*DL07[:,minsol[0],minsol[1],minsol[2]]
     A=np.array(A)
     bestfit=np.copy(A)
@@ -294,13 +385,17 @@ def galproc(galaxy):
     A=A.T
 
 
-    lll=len(dat1[0,:,0])*len(dat1[0,0,:])*len(g)
-    SOL_f=SOL.reshape(15,int(lll))
+    SOL_f=SOL.reshape(SOL.shape[0],-1)
     CHI_f=CHI.flatten()
-    deltaCHI=(CHI_f/(len(flux)-1))-(chi2/(len(flux)-1))
-    #CHImask=np.argsort(CHI_f)
-    #CHImask=CHImask[0:np.int(0.3*len(CHImask))]
-    CHImask=deltaCHI<1.3
+
+
+    nfree=1
+    #deltaCHI=(CHI_f/(len(flux)-nfree))-(chi2/(len(flux)-nfree))
+    deltaCHI=(CHI_f-chi2)
+    Delta_chisq_of_interest=11.498779
+
+    CHImask=deltaCHI<Delta_chisq_of_interest
+
     SOL_13=SOL_f[:,CHImask]
 
     covmask=np.argwhere(nnsol==0)
@@ -309,38 +404,11 @@ def galproc(galaxy):
     C=np.delete(A,covmask,axis=1)
 
 
-    vec=chi_vectors(A,SOL_13)
-
-
-
-    'Producing the covariance matrix from template matrix A, and solution nnsol'
-    '''
-    try:
-        cov = np.matrix(np.dot(C.T, C)).I.A
-        covsam=np.random.multivariate_normal(nnsol_mask,cov,10**3)
-        incl_val=[]
-        for val in range(len(covsam[:,0])):
-            if all(h>0 for h in covsam[val,:]):
-                incl_val.append(val)
-        covsam=covsam[incl_val,:]
-        nnsol_cov=np.zeros((len(covsam[:,0]),len(nnsol)))
-        nnsol_cov[:,covmask2]=covsam
-    except:
-        nnsol_cov=nnsol
-    '''
+    Mdust_chi=(DG_ratio*SOL_f[-1,:]*b*(const.m_p/const.M_sun)) #Mdust
 
     #------------------------------------------------------------------
     #Functions
-
-    def f_opt(x,*params): #Fitted photometry
-        l=np.arange(0,len(x),1)
-        #q=qpah
-        #g=g_index
-        #q2=qpah2
-        params=np.array(params)
-        r=np.sum(params*bestfit,axis=1)
-        return r
-
+    '''
     def stellar(*params): #Stellar template
         params=np.array(params)
         optt=params*np.array(GB.T)
@@ -371,9 +439,7 @@ def galproc(galaxy):
         a=agnpl(params[steltemp:steltemp+agntemp])
         return s+a+i
 
-    '''
-    This computes LIR, given the template function and the solution vector
-    '''
+
     def LumIR(f,param):
         flux=f(*param)*10**-26
         luminosity_v=((4*pi*lum_dist**2*flux*(1.+z)**-1)*u.erg).si
@@ -383,14 +449,19 @@ def galproc(galaxy):
         Luminosity_IR=integrate.trapz((luminosity_v*c*wavelength**-2).value,wavelength.value)*(3.839*10**26)**-1
 
         return Luminosity_IR
-
+    '''
     #---------------------------------------------------
-    chi2red_nnls=chi2/(len(flux)-1)
+    chi2_reduced=chi2/(len(flux)-nfree)
+    chi2_manual=np.sum((np.sum((nnsol*bestfit.T),axis=1)-flux)**2*(flux_e**2)**-1)
     #---------------------------------------------------
     #Finding initial values for quantities of interest
-    Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):])
-    Lir_total=LumIR(full_template,nnsol)
-    Lir_stellar=LumIR(stellar,nnsol[:steltemp])
+    #Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):])
+    #Lir_total=LumIR(full_template,nnsol)
+    #Lir_stellar=LumIR(stellar,nnsol[:steltemp])
+
+    Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):],template=minsol)
+    Lir_total=LumIR(full_template,nnsol,template=minsol)
+    #Lir_stellar=LumIR(stellar,nnsol[:steltemp])
 
 
 
@@ -408,16 +479,17 @@ def galproc(galaxy):
 
     Mdust=DG_ratio*Mgas_nnls
 
-    #---------------------------------------------------------------------------
 
-    t_param=Table.read('templates/fsps_QSF_12_v3.param.fits')
+
+
+    #---------------------------------------------------------------------------
 
     dl=cosmo.luminosity_distance(z).to(u.cm)
     conv=((1*u.mJy).to(u.erg/u.s/u.cm**2/u.Hz))*4*np.pi*dl**2/(1+z)
 
     fnu_units = u.erg/u.s/u.cm**2/u.Hz
     mJy_to_cgs = u.mJy.to(u.erg/u.s/u.cm**2/u.Hz)
-    fnu_scl = 1*mJy_to_cgs
+    fnu_scl = 10**(-0.4*(ABZP-23.9))*1*mJy_to_cgs
 
     template_fnu_units=(1*u.solLum / u.Hz)
     to_physical = fnu_scl*fnu_units*4*np.pi*dl**2/(1+z)
@@ -431,14 +503,17 @@ def galproc(galaxy):
 
     mass = coeffs_rest.dot(t_param['mass'])
     sfr = coeffs_rest.dot(t_param['sfr'])
-    print(np.log10(mass))
+    #print(np.log10(mass))
     print('cat_mass',np.log10(Mstar))
+
+
+    #Compute stellar mass from the K-band, using L/M=0.6
 
     idx_k=find_nearest(RFull,2.2)
     L_K=(stellar(*nnsol[:(steltemp)])*igm_factor*conv)[idx_k]*(const.c/(2.2*u.um))
     L_K=((L_K).to(u.erg/u.s)).to(u.solLum).value
     mass_K=L_K*0.6
-    print('mass K',np.log10(mass_K))
+    #print('mass K',np.log10(mass_K))
 
     #---------------------------------------------------------------------------
 
@@ -446,9 +521,11 @@ def galproc(galaxy):
 
     reddest_flux=DL07[-1,:,:,:].flatten()
     reddest_flux/=np.median(reddest_flux)
-    reddest_flux=reddest_flux[deltaCHI<1.3]
+    reddest_flux=reddest_flux[deltaCHI<Delta_chisq_of_interest]
 
     red_sigma=Mdust*((10**np.std(np.log10(reddest_flux)))-1)
+
+
 
 
 
@@ -457,16 +534,19 @@ def galproc(galaxy):
     if Mstar==-99:
         Mgas=deltaGDR=-99
     else:
-        Mgas,deltaGDR=mgas_metallicity_manucci(Mstar,Mdust,SFR)
+        if use_own_stellar_mass:
+            Mgas,deltaGDR=mgas_metallicity_manucci(mass,Mdust,SFR)
+        else:
+            Mgas,deltaGDR=mgas_metallicity_manucci(Mstar,Mdust,SFR)
     #------------------------------------------------------
 
-
+    cov_start=time.time()
 
     Mdust_cov=[]
     Lir_total_cov=[]
     Lir_draine_cov=[]
     eLir_total=eLir_draine=eLagn=eMD=eMG=efagn=-99
-    max_allowed = 1
+    max_allowed = 5
     attempt = 0
     timer=1
     loop_time_start=time.time()
@@ -491,9 +571,14 @@ def galproc(galaxy):
         try:
             nnsol_cov_sum=np.sum(nnsol_cov[:,total-irtemp:],axis=1)
             Mdust_cov=DG_ratio*nnsol_cov_sum*b*(const.m_p/const.M_sun)
+            coeffs_rest = (b1**-1*nnsol_cov[:,:12].T*to_physical).T
+            coeffs_rest = np.array(coeffs_rest)
+            #mass_cov = coeffs_rest.dot(t_param['mass'])
+            mass_cov=np.tensordot(coeffs_rest,t_param['mass'],axes=1)
+
             for x,obj in enumerate(nnsol_cov[:,0]):
-                Lir_total_cov.append(LumIR(full_template,nnsol_cov[x,:]))
-                Lir_draine_cov.append(LumIR(full_ir,nnsol_cov[x,(total-irtemp):]))
+                Lir_total_cov.append(LumIR(full_template,nnsol_cov[x,:],template=minsol))
+                Lir_draine_cov.append(LumIR(full_ir,nnsol_cov[x,(total-irtemp):],template=minsol))
 
             Lagn_cov=np.array(Lir_total_cov)-np.array(Lir_draine_cov)
             fagn_cov=np.array(Lagn_cov)/np.array(Lir_total_cov)
@@ -504,8 +589,10 @@ def galproc(galaxy):
             eMD=mean_confidence_interval_fast_error(Mdust_cov,Mdust)
             efagn=mean_confidence_interval_fast_error(fagn_cov,fagn)
             eMG=eMD*deltaGDR
+            eMstar=mean_confidence_interval_fast_error(mass_cov,mass)
 
-        except:
+        except Exception as e:
+            print(e)
             print('multivar_gauss: fail')
             break
 
@@ -516,9 +603,10 @@ def galproc(galaxy):
         Lir_chi=[]
         Lir_draine_chi=[]
         Mdust_chi=[]
+        gamma_chi=[]
         for x,obj in enumerate(SOL_13[0,:]):
             Lir_chi.append(LumIR(full_template,SOL_13[:,x]))
-            #Lir_draine_chi.append(LumIR(full_ir,SOL_13[(total-irtemp):,x]))
+            Lir_draine_chi.append(LumIR(full_ir,SOL_13[(total-irtemp):,x]))
             Mdust_chi.append(DG_ratio*SOL_13[-1,x]*b*(const.m_p/const.M_sun))
 
         Lir_chi=np.array(Lir_chi)
@@ -551,54 +639,23 @@ def galproc(galaxy):
     else:
         eMD=red_sigma
 
-    #cov_data=np.array([CHI_13,Lir_chi,Lir_draine_chi,Mdust_chi])
-    #cov_names=['chi2','Lir_total','Lir_draine','MD',]
-    #covar=Table(cov_data.T,names=cov_names,dtype=len(cov_names)*[float])
-    #covar.write(covarloc+str(int(P[galaxy_index,0])) + '_covar_all_chi.fits',overwrite=True)
-    '''
-    def get_pdf(pdf,arr,range,bins=50):
-        bins=np.linspace(range[0],range[1],bins)
-        dig=np.digitize(arr,bins,right=True)
-        pdf_sum=[]
-        for i,_ in enumerate(bins):
-            if len(pdf[dig==i])==0:
-                weight=1
-            else:
-                weight=len(pdf[dig==i])
-                #kweight=1
-            pdf_sum.append(np.sum(pdf[dig==i])/weight)
-        return np.array([bins,pdf_sum])
+    emd2=np.std(np.array(Mdust_chi)[deltaCHI<Delta_chisq_of_interest])
 
-    pdf=np.exp(-CHI_13/2)
 
-    fig= plt.figure(figsize=(10,10))
+    if save_covar:
 
-    ax = fig.add_subplot(2,2,1)
-    med=np.log10(Lir_total)
-    lir_total_pdf=get_pdf(pdf,np.log10(Lir_chi),range=[med-0.1,med+0.1])
-    fill_between(lir_total_pdf[0],0,lir_total_pdf[1],alpha=0.5)
-    ax.set_xlim(np.log10(Lir_total)-0.1,np.log10(Lir_total)+0.1)
-    ax.set_ylim(0,)
-    ax.set_yticklabels([])
-    ax.set_ylabel('Probability')
-    ax.set_xlabel(r'L$_{\rm IR,total}$')
-    axvline(med)
+        cov_data=np.array([chi2_cov,Lir_chi,Lir_draine_chi,Mdust_chi,gamma_chi,fpdr_chi])
+        cov_names=['chi2','Lir_total','Lir_draine','MD','gamma','fpdr']
+        covar=Table(cov_data.T,names=cov_names,dtype=len(cov_names)*[float])
+        covar.write(covarloc+str(int(P[galaxy_index,0])) + '_covar_all_chi.fits',overwrite=True)
 
-    ax = fig.add_subplot(2,2,2)
-    med=np.log10(Mdust)
-    total_pdf=get_pdf(pdf,np.log10(Mdust_chi),range=[med-0.1,med+0.1])
-    fill_between(total_pdf[0],0,total_pdf[1],alpha=0.5)
-    ax.set_ylim(0,)
-    ax.set_yticklabels([])
-    ax.set_xlabel(r'M$_{\rm dust}$')
-    axvline(med)
-    '''
     if verbose:
         print('------------------------------------------')
         print ('ID:',int(P[galaxy_index,0]))
         print ('LIR:',"%.4g" % (Lir_total),'+-',"%.4g" % (eLir_total),'Lsol')
         print ('Mdust:',"%.4g" % Mdust ,'+-',"%.4g" % eMD,'Msol' )
-        print ('chi2red:',"%.4g" % chi2red_nnls)
+        print ('Mstar:',"%.4g" % mass ,'+-',"%.4g" % eMstar,'Msol' )
+        print ('chi2_nu:',"%.4g" % chi2_reduced)
         print('------------------------------------------')
 
     #--------------------------------------------------
@@ -634,7 +691,7 @@ def galproc(galaxy):
         else:
             RADIO=np.zeros_like(RFull)
 
-        toSED=np.array([RFull*(1.+z),stellar(*nnsol[:(steltemp)])*igm_factor,agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor,full_ir(*nnsol[(total-irtemp):])*igm_factor,full_template(*nnsol)*igm_factor,RADIO])
+        toSED=np.array([RFull*(1.+z),stellar(*nnsol[:(steltemp)])*igm_factor,agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor,full_ir(nnsol[(total-irtemp):],minsol)*igm_factor,full_template(nnsol,minsol)*igm_factor,RADIO])
         tableSED=Table(toSED.T,names=['lambda','stellar','AGN','IR','Total','Radio'],dtype=[float,float,float,float,float,float])
         tableSED.write(sedloc+str(int(P[galaxy_index,0])) + ".fits",overwrite=True)
 
@@ -655,7 +712,7 @@ def galproc(galaxy):
 
         SF=stellar(*nnsol[:(steltemp)])*igm_factor
         AGN=agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor
-        IR=full_ir(*nnsol[(total-irtemp):])*igm_factor
+        IR=full_ir(nnsol[(total-irtemp):],minsol)*igm_factor
 
         if radio:
             #RADIO=rad_flux(RFull*(1.+z))
@@ -678,6 +735,8 @@ def galproc(galaxy):
 
         #plt.plot(wav_ar,np.sum(nnsol*bestfit.T,axis=1),'bo')
 
+
+
         points=((flux/flux_e_orig)>=3)
 
 
@@ -692,6 +751,7 @@ def galproc(galaxy):
 
         plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
         plt.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
+        plt.text(0.02, 0.65,r'logf={:.2f}'.format(np.log10(Mgas/Mstar)), color='k',fontsize=20,transform=ax.transAxes)
 
         ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
         xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
@@ -713,10 +773,10 @@ def galproc(galaxy):
         print ('Finished fitting ID:',P[galaxy_index,0])
         print('------------------------------------------')
 
-    R=np.array([int(P[galaxy_index,0]),Lir_total,eLir_total,Mdust,eMD,z,chi2red_nnls,fagn,efagn,
+    R=np.array([int(P[galaxy_index,0]),Lir_total,eLir_total,Mdust,eMD,z,chi2_reduced,fagn,efagn,
     lastdet,Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
     Mgas/Mstar,Lir_med,Lir_med_err,Mdust_med,Mdust_med_err,Umin[minsol[0]],minsol[1],
-    g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine,mass,mass_K])
+    g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine,mass,eMstar,mass_K,chi2,nfilt])
 
     nnsol=np.array(nnsol)
 
@@ -739,8 +799,9 @@ def galproc(galaxy):
 objects=range(len(G[:,0]))
 
 if not multithread:
+    otp=[]
     for i,obj in enumerate(objects):
-        galproc(i)
+        otp.append(galproc(i))
 
 
 if multithread:
@@ -758,7 +819,6 @@ if multithread:
 
 if save_table:
     table_final=Table.read(table_out)
-    #table_final=table_final[table_final['ID']!=0] #Remove placeholder row
     table_final=table_final[1:] #Remove placeholder row
     table_final.write(table_out,overwrite=True)
 

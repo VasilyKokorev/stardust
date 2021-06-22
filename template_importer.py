@@ -34,20 +34,31 @@ Defining constants and wavelength range for all templates
 c=const.c
 Lsol=(const.L_sun.cgs).value
 
+
 RFull=np.logspace(-4,5.5,10**4)
 RFullnu=c*(RFull*10**-6)**-1
 ltn=(RFull**2)*(3*10**8)**-1
 #==============================================================================
 diagnostic_optical=False
-OT=Table.read('templates/GB_updated.fits')
+
+#OT=Table.read('templates/narrow_test.fits')
+OT=Table.read('templates/narrow_test_no_lines_ext.fits')
 OT_arr = (np.lib.recfunctions.structured_to_unstructured(OT.as_array())).T
+
+#t_param=Table.read('templates/fsps_QSF_12_v3.param.fits')
+t_param=Table.read('templates/fsps_QSF_12_v3_narrow.param.fits')
+
+
+RFull=np.array(OT['lambda'])
+ltn=(RFull**2)*(3*10**8)**-1
 
 OT_arr_flux=OT_arr[1:,:]
 
 GB=np.zeros((len(OT_arr_flux),(len(RFull))))
 for i,_ in enumerate(OT_arr_flux[:,0]):
-    f=interp1d(OT_arr[0,:],OT_arr_flux[i,:],bounds_error=False,fill_value=0,kind='linear')
-    GB[i,:]=f(RFull)
+    #f=interp1d(OT_arr[0,:],OT_arr_flux[i,:],bounds_error=False,fill_value=0,kind='linear')
+    #GB[i,:]=f(RFull)
+    GB[i,:]=OT_arr_flux[i,:]
 
 if qso:
     #qso_templ=Table.read('templates/shen2016_ext.fits')
@@ -168,6 +179,7 @@ for i,obj in enumerate(dat1[0,:,0]):
     for j,obj in enumerate(dat1[0,0,:]):
         for k,obj in enumerate(g):
             DL07_0[:,i,j,k]=S(i,j,k)
+
 
 #==============================================================================
 

@@ -13,6 +13,7 @@ import os
 import sys
 
 from config import *
+from functions import *
 
 
 print('------------')
@@ -29,10 +30,8 @@ pi=np.pi
 #===============================================================================
 
 DATA=Table.read(f'{cat_name}', memmap=True)
-
-#subset=Table.read('/Users/vasily/Documents/PhD/Projects/release/output/test_igm_K/mass_test_igm_K.fits')
-
-#DATA=DATA[np.isin(DATA['ID'],subset['ID'])]
+lst=[10041706,10100707]
+DATA=DATA[np.isin(DATA['ID'],lst)]
 
 print(f'Read a catalogue with {len(DATA)} objects')
 
@@ -116,9 +115,14 @@ if verbose>0:
 
 if extra_bands:
     xtra_bnds=np.loadtxt(extra_bands_file,dtype='str')
-    wavelength_extra=xtra_bnds[:,0].tolist()
-    bands_extra=xtra_bnds[:,1].tolist()
-    err_bands_extra=xtra_bnds[:,2].tolist()
+    try:
+        wavelength_extra=xtra_bnds[:,0].tolist()
+        bands_extra=xtra_bnds[:,1].tolist()
+        err_bands_extra=xtra_bnds[:,2].tolist()
+    except:
+        wavelength_extra=[np.array(xtra_bnds[0]).tolist()]
+        bands_extra=[np.array(xtra_bnds[1]).tolist()]
+        err_bands_extra=[np.array(xtra_bnds[2]).tolist()]
     if verbose==1:
         print(f'Added extra bands from {extra_bands_file}')
 #===============================================================================
@@ -139,8 +143,8 @@ if impose_cut:
     ztype=np.ones(len(zphot))
     zbest=DATA['zspec']
     zspec=DATA['zspec']
-    ztype[zbest<0]=0
-    zbest[zbest<0]=zphot[zbest<0]
+    ztype[zbest<=0]=0
+    zbest[zbest<=0]=zphot[zbest<=0]
     DATA['zphot']=zbest
 else:
     ztype=np.array([1]*len(DATA))
@@ -159,6 +163,13 @@ if extra_bands:
     G=np.concatenate((G,G_ex),axis=1)
     E=np.concatenate((E,E_ex),axis=1)
     W=np.concatenate((W,W_ex),axis=1)
+
+#Converting everything to mJy
+
+G*=convert_to_mjy(flux_unit)
+E*=convert_to_mjy(flux_unit)
+
+
 
 P=np.array((np.array(DATA[param_names])).tolist())
 

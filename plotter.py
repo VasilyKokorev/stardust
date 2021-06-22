@@ -54,11 +54,12 @@ for i,_ in enumerate(P[:,0]):
     ax.text(0.02, 0.85,'ID '+str(int(_)), color='k',fontsize=20,transform=ax.transAxes)
     ax.text(0.02, 0.75,r'$z$={:.2f}'.format(P[i,1]), color='k',fontsize=20,transform=ax.transAxes)
 
-    flux=G[i,:]
-    flux_e=E[i,:]
-    sfx=W[i,:]
+    flux=np.copy(G[i,:])
+    flux_e=np.copy(E[i,:])
+    sfx=np.copy(W[i,:])
     points=((flux/flux_e)>=3)
 
+    
 
     ax.errorbar(sfx[points],flux[points],yerr=flux_e[points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
     ax.scatter(sfx[~points],(flux+3*flux_e)[~points],marker=r'$\downarrow$',s=300,color='red',zorder=11)
