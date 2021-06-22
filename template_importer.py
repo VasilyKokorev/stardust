@@ -65,28 +65,6 @@ if qso:
     #qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
     #qso=qso_func(RFull)*ltn
     GB[:,:]*=0
-    '''
-    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.0.fits')
-    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
-    qso=qso_func(RFull)*ltn
-    GB[0,:]=qso
-    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.1.fits')
-    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
-    qso=qso_func(RFull)*ltn
-    GB[1,:]=qso
-    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.2.fits')
-    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
-    qso=qso_func(RFull)*ltn
-    GB[2,:]=qso
-    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.3.fits')
-    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
-    qso=qso_func(RFull)*ltn
-    GB[3,:]=qso
-    qso_templ=Table.read('templates/QSO/shen2016_ext_Av0.4.fits')
-    qso_func=interp1d(qso_templ['wave']*10**-4,qso_templ['flux'],bounds_error=False,fill_value=0,kind='cubic')
-    qso=qso_func(RFull)*ltn
-    GB[4,:]=qso
-    '''
     QSO,qso_wave=get_qso_templates()
     for i,_ in enumerate(QSO[:,0]):
         qso_func=interp1d(qso_wave*10**-4,QSO[i,:],bounds_error=False,fill_value=0,kind='cubic')

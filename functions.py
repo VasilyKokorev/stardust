@@ -131,6 +131,37 @@ def integrate_filter(sedx,sedy,lam,T,scale=1., z=0):
         return temp_int
 
 
+def interp_conserve(x, xp, fp, left=0., right=0.):
+    midpoint = (x[1:]-x[:-1])/2.+x[:-1]
+    midpoint = np.append(midpoint, np.array([x[0],x[-1]]))
+    midpoint = midpoint[np.argsort(midpoint)]
+    int_midpoint = np.interp(midpoint, xp, fp, left=left, right=right)
+    int_midpoint[midpoint > xp.max()] = right
+    int_midpoint[midpoint < xp.min()] = left
+
+    fullx = np.append(xp, midpoint)
+    fully = np.append(fp, int_midpoint)
+
+    so = np.argsort(fullx)
+    fullx, fully = fullx[so], fully[so]
+
+    outy = x*0.
+    dx = midpoint[1:]-midpoint[:-1]
+    for i in range(len(x)):
+        bin = (fullx >= midpoint[i]) & (fullx <= midpoint[i+1])
+        outy[i] = np.trapz(fully[bin], fullx[bin])/dx[i]
+
+    return outy
+
+
+def convolver_(sedx,sedy,lam,T,obs):
+    templ_filter = interp_conserve(lam, sedx,sedy, left=0, right=0)
+    integrator = np.trapz
+    temp_int = integrator(T*templ_filter/lam, lam)/integrator(T/lam, lam)
+
+    return temp_int
+
+
 def find_nearest(array, value):
     n = [abs(i-value) for i in array]
     idx = n.index(min(n))

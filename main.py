@@ -196,13 +196,13 @@ def galproc(galaxy):
     GB_T=np.zeros((len(sfx),len(GB[:,0])))
     for i,obj in enumerate(GB[:,0]):
         for p,obj in enumerate(sfx):
-            #GB_T[p,i]=convolver(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
-            GB_T[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1])
+            GB_T[p,i]=convolver_(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1],sfx[p])
+            #GB_T[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,FILTERS[p][0],FILTERS[p][1])
 
         if extra_bands:
             for p,obj in enumerate(sfx_extra):
-                #GB_T_ex[p,i]=convolver(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
-                GB_T_ex[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1])
+                GB_T_ex[p,i]=convolver_(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1],sfx_extra[p])
+                #GB_T_ex[p,i]=integrate_filter(RFullred,GB[i,:]*igm_factor,filt_extra[p][0],filt_extra[p][1])
 
 
 
@@ -215,7 +215,6 @@ def galproc(galaxy):
 
     if verbose>1:
         print('Synthetic Photometry - ',time_synphot,'s')
-
 
     #==========================================================================
 
@@ -243,16 +242,6 @@ def galproc(galaxy):
     DL07=DL07[sort]
     GB_T=GB_T[sort]
     agn_c=agn_c[sort]
-
-
-
-
-    #plt.plot(wav_ar,flux,'ro')
-    #plt.yscale('log')
-    #plt.xscale('log')
-    #plt.show()
-    #sys.exit()
-
     #-------------------------------------
     A=[]
     try:
@@ -356,8 +345,8 @@ def galproc(galaxy):
                         gamma_chi.append(g[i3])
                         fpdr_chi.append(f_pdr(g[i3],Umin[i1]))
                         chi2_cov.append(ier**2)
-                        chi2_ir=np.sum(  ((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar>3.5]           )
-                        chi2_opt=np.sum(  ((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar<3.5]           )
+                        chi2_ir=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar>3.5])
+                        chi2_opt=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar<3.5])
                         chi2_opt_cov.append(chi2_opt)
                         print('IR',chi2_ir)
                         print('OPT',chi2_opt)
@@ -652,7 +641,7 @@ def galproc(galaxy):
     if verbose:
         print('------------------------------------------')
         print ('ID:',int(P[galaxy_index,0]))
-        print ('LIR:',"%.4g" % (Lir_total),'+-',"%.4g" % (eLir_total),'Lsol')
+        print ('Total LIR:',"%.4g" % (Lir_total),'+-',"%.4g" % (eLir_total),'Lsol')
         print ('Mdust:',"%.4g" % Mdust ,'+-',"%.4g" % eMD,'Msol' )
         print ('Mstar:',"%.4g" % mass ,'+-',"%.4g" % eMstar,'Msol' )
         print ('chi2_nu:',"%.4g" % chi2_reduced)
@@ -751,7 +740,6 @@ def galproc(galaxy):
 
         plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
         plt.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
-        plt.text(0.02, 0.65,r'logf={:.2f}'.format(np.log10(Mgas/Mstar)), color='k',fontsize=20,transform=ax.transAxes)
 
         ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
         xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)

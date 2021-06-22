@@ -36,8 +36,8 @@ radio=1
 radio_method='delv20'
 
 save_fig=0
-save_table=1
-save_sed=1
+save_table=0
+save_sed=0
 save_covar=0
 
 impose_cut=0
@@ -48,7 +48,7 @@ impose_detection_cut=0
 #===============================================================================
 uncert_scale=0.05
 qso=0
-igm_switch=1
+igm_switch=0 #only works if EAZY is installed
 use_own_stellar_mass=1
 ABZP=23.9
 #===============================================================================
