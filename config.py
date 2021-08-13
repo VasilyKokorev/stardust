@@ -1,19 +1,20 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='/Users/vasily/Documents/Tables/sdc+laigle_corrected_mw.fits'
+#cat_name='/Users/vasily/Documents/Tables/sdc+laigle_corrected_mw.fits'
+cat_name='example/stellar+ir/c2015_sdc2_example.fits'
 
-bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2015.bands'
-param_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2015.param'
+bands_file='example/stellar+ir/example.bands'
+param_file='example/stellar+ir/example.param'
 
-extra_bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2020_alma.bands_extra'
+extra_bands_file=''
 
 #===============================================================================
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = '/Users/vasily/Documents/PhD/Projects/release/output/chi2_test/'
+PATH = 'example/stellar+ir/output/'
 
-output_name='chi2_test' #Name of output table
+output_name='stellar+ir_example_output' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -25,7 +26,7 @@ covarloc=f'{PATH}covar_tables/' #Location of covariance tables
 'GENERAL SETTINGS'
 #===============================================================================
 flux_unit='mJy'
-multithread=0
+multithread=1
 verbose=1 # Allowed 0,1,2
 extra_bands=0
 
@@ -35,9 +36,9 @@ diagplot=1
 radio=1
 radio_method='delv20'
 
-save_fig=0
-save_table=0
-save_sed=0
+save_fig=1
+save_table=1
+save_sed=1
 save_covar=0
 
 impose_cut=0
@@ -49,7 +50,7 @@ impose_detection_cut=0
 uncert_scale=0.05
 qso=0
 igm_switch=0 #only works if EAZY is installed
-use_own_stellar_mass=1
+use_own_stellar_mass=0
 ABZP=23.9
 #===============================================================================
 'TEMPLATE PARAMETERS'

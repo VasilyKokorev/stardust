@@ -27,8 +27,6 @@ from astropy.table import hstack
 from astropy.table import vstack
 from functions import *
 
-
-
 timer_start=time.time()
 
 from init import *
@@ -49,14 +47,15 @@ from template_importer import *
 #---------------------------------------------------------
 def galproc(galaxy):
     galaxy_index=galaxy
+    galaxy_id=int(P[galaxy_index,0])
     if verbose:
-        print ('Calculating index:',(P[galaxy_index,0]))
+        print ('Fitting galaxy ID:',galaxy_id)
 
 
 
     z=P[galaxy_index,1]
     if z<=0:
-        print(f'ID:{P[galaxy_index,0]} has z<=0, skipped')
+        print(f'ID:{galaxy_id} has z<=0, skipped')
         return None
 
     try:
@@ -109,7 +108,6 @@ def galproc(galaxy):
 
     nfilt=len(flux)
 
-
     #return int(P[galaxy_index,0]),nfilt
 
 
@@ -138,7 +136,6 @@ def galproc(galaxy):
     except:
         print('Failed at ID ', P[galaxy_index,0])
         return None
-
 
 
     #==========================================================================
@@ -279,7 +276,8 @@ def galproc(galaxy):
     def full_ir(params,template): #IR template
         params=np.array(params)
         r=[]
-        r.append(S(template[0],template[1],template[2]))
+        #r.append(S(template[0],template[1],template[2]))
+        r.append(DL07_0[:,template[0],template[1],template[2]])
         r=np.array(r)
         r=params*r.T
         return b*FL*(np.sum(r,axis=1))
@@ -302,13 +300,12 @@ def galproc(galaxy):
     '''
     This computes LIR, given the template function and the solution vector
     '''
-    def LumIR(f,param,template=minsol):
+    def LumIR(f,param,ir_range,template=minsol):
         template=np.array(template)
         flux=f(param,template)*10**-26
         luminosity_v=((4*pi*lum_dist**2*flux*(1+z)**-1)*u.erg).si
-        wavrange=[find_nearest(RFull,8),find_nearest(RFull,1000)+1]
-        luminosity_v=luminosity_v[wavrange[0]:wavrange[1]]
-        wavelength=((RFull[wavrange[0]:wavrange[1]]*(1.+0))*u.um).si
+        luminosity_v=luminosity_v[ir_range[0]:ir_range[1]]
+        wavelength=((RFull[ir_range[0]:ir_range[1]]*(1.+0))*u.um).si
         Luminosity_IR=integrate.trapz((luminosity_v*c*wavelength**-2).value,wavelength.value)*(3.839*10**26)**-1
         return Luminosity_IR
     #---------------------------------------------------------------------------
@@ -323,11 +320,14 @@ def galproc(galaxy):
 
     ir_cntr=len(wav_ar[wav_ar>3.5])
 
-    chi2_opt_cov=[]
+
+
+    SOL_ID=[]
 
     for i1,obj in enumerate(dat1[0,:,0]):
         for i2,obj in enumerate(dat1[0,0,:]):
             for i3,obj in enumerate(g):
+                SOL_ID.append(np.array([i1,i2,i3]))
                 B=np.copy(A)
                 B[-1,:]=b*DL07[:,i1,i2,i3]
                 B=np.array(B)
@@ -339,20 +339,16 @@ def galproc(galaxy):
                     SOL[:,i1,i2,i3]=nnsol
                     CHI[i1,i2,i3]=ier**2
                     if save_covar:
-                        Lir_chi.append(LumIR(full_template,nnsol,template=[i1,i2,i3])) #Total LIR
-                        Lir_draine_chi.append(LumIR(full_template_ir,nnsol,template=[i1,i2,i3])) #LIR only for the DL07 template
+
+                        Lir_chi.append(LumIR(full_template,nnsol,ir_range,template=[i1,i2,i3])) #Total LIR
+                        #Lir_draine_chi.append(LumIR(full_template_ir,nnsol,template=[i1,i2,i3])) #LIR only for the DL07 template
                         #Mdust_chi.append(DG_ratio*nnsol[-1]*b*(const.m_p/const.M_sun)) #Mdust
                         gamma_chi.append(g[i3])
                         fpdr_chi.append(f_pdr(g[i3],Umin[i1]))
                         chi2_cov.append(ier**2)
-                        chi2_ir=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar>3.5])
-                        chi2_opt=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar<3.5])
-                        chi2_opt_cov.append(chi2_opt)
-                        print('IR',chi2_ir)
-                        print('OPT',chi2_opt)
-                        print('TOT',ier**2)
-
-
+                        #chi2_ir=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar>3.5])
+                        #chi2_opt=np.sum(((np.sum((nnsol*C.T),axis=1)-flux)**2*(flux_e**2)**-1)[wav_ar<3.5])
+                        #chi2_opt_cov.append(chi2_opt)
                 except:
                     nnsol = np.array([0.]*total)
 
@@ -379,7 +375,7 @@ def galproc(galaxy):
 
 
     nfree=1
-    #deltaCHI=(CHI_f/(len(flux)-nfree))-(chi2/(len(flux)-nfree))
+
     deltaCHI=(CHI_f-chi2)
     Delta_chisq_of_interest=11.498779
 
@@ -444,14 +440,9 @@ def galproc(galaxy):
     chi2_manual=np.sum((np.sum((nnsol*bestfit.T),axis=1)-flux)**2*(flux_e**2)**-1)
     #---------------------------------------------------
     #Finding initial values for quantities of interest
-    #Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):])
-    #Lir_total=LumIR(full_template,nnsol)
-    #Lir_stellar=LumIR(stellar,nnsol[:steltemp])
 
-    Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):],template=minsol)
-    Lir_total=LumIR(full_template,nnsol,template=minsol)
-    #Lir_stellar=LumIR(stellar,nnsol[:steltemp])
-
+    Lir_draine=LumIR(full_ir,nnsol[(total-irtemp):],ir_range,template=minsol)
+    Lir_total=LumIR(full_template,nnsol,ir_range,template=minsol)
 
 
     Lagn=(Lir_total-Lir_draine)
@@ -467,7 +458,6 @@ def galproc(galaxy):
     Mgas_nnls=nnsol[-1]*b*(const.m_p/const.M_sun)
 
     Mdust=DG_ratio*Mgas_nnls
-
 
 
 
@@ -493,7 +483,7 @@ def galproc(galaxy):
     mass = coeffs_rest.dot(t_param['mass'])
     sfr = coeffs_rest.dot(t_param['sfr'])
     #print(np.log10(mass))
-    print('cat_mass',np.log10(Mstar))
+    print('cat_mass', "%.4g" % Mstar)
 
 
     #Compute stellar mass from the K-band, using L/M=0.6
@@ -534,7 +524,7 @@ def galproc(galaxy):
     Mdust_cov=[]
     Lir_total_cov=[]
     Lir_draine_cov=[]
-    eLir_total=eLir_draine=eLagn=eMD=eMG=efagn=-99
+    eMstar=eLir_total=eLir_draine=eLagn=eMD=eMG=efagn=-99
     max_allowed = 5
     attempt = 0
     timer=1
@@ -566,8 +556,8 @@ def galproc(galaxy):
             mass_cov=np.tensordot(coeffs_rest,t_param['mass'],axes=1)
 
             for x,obj in enumerate(nnsol_cov[:,0]):
-                Lir_total_cov.append(LumIR(full_template,nnsol_cov[x,:],template=minsol))
-                Lir_draine_cov.append(LumIR(full_ir,nnsol_cov[x,(total-irtemp):],template=minsol))
+                Lir_total_cov.append(LumIR(full_template,nnsol_cov[x,:],ir_range,template=minsol))
+                Lir_draine_cov.append(LumIR(full_ir,nnsol_cov[x,(total-irtemp):],ir_range,template=minsol))
 
             Lagn_cov=np.array(Lir_total_cov)-np.array(Lir_draine_cov)
             fagn_cov=np.array(Lagn_cov)/np.array(Lir_total_cov)
@@ -640,7 +630,7 @@ def galproc(galaxy):
 
     if verbose:
         print('------------------------------------------')
-        print ('ID:',int(P[galaxy_index,0]))
+        print ('ID:',int(galaxy_id))
         print ('Total LIR:',"%.4g" % (Lir_total),'+-',"%.4g" % (eLir_total),'Lsol')
         print ('Mdust:',"%.4g" % Mdust ,'+-',"%.4g" % eMD,'Msol' )
         print ('Mstar:',"%.4g" % mass ,'+-',"%.4g" % eMstar,'Msol' )
@@ -673,20 +663,35 @@ def galproc(galaxy):
         return output
     #--------------------------------------------------
 
+    SF=stellar(*nnsol[:(steltemp)])*igm_factor
+    AGN=agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor
+    IR=full_ir(nnsol[(total-irtemp):],minsol)*igm_factor
+    lambda_SED=RFull*(1.+z)
+
+    if radio:
+        #RADIO=rad_flux(RFull*(1.+z))
+        RADIO=rad_flux(RFull*(1.+z),method=radio_method,alpha=-0.75,use_K=False)
+        TOTAL=SF+AGN+IR+RADIO
+    else:
+        TOTAL=SF+AGN+IR
+        RADIO=np.zeros_like(RFull)
+
+    #--------------------------------------------------
+
     if save_sed:
 
-        if radio:
-            RADIO=rad_flux(RFull*(1.+z),method=radio_method,alpha=-0.75,use_K=False)
-        else:
-            RADIO=np.zeros_like(RFull)
+        #if radio:
+        #    RADIO=rad_flux(RFull*(1.+z),method=radio_method,alpha=-0.75,use_K=False)
+        #else:
+        #    RADIO=np.zeros_like(RFull)
 
-        toSED=np.array([RFull*(1.+z),stellar(*nnsol[:(steltemp)])*igm_factor,agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor,full_ir(nnsol[(total-irtemp):],minsol)*igm_factor,full_template(nnsol,minsol)*igm_factor,RADIO])
+        toSED=np.array([lambda_SED,SF,AGN,IR,SF+AGN+IR,RADIO])
         tableSED=Table(toSED.T,names=['lambda','stellar','AGN','IR','Total','Radio'],dtype=[float,float,float,float,float,float])
         tableSED.write(sedloc+str(int(P[galaxy_index,0])) + ".fits",overwrite=True)
 
     #--------------------------------------------------
 
-    if not multithread:
+    if not multithread and diagplot:
         fig= plt.figure(figsize=(10,5))
         ax = fig.add_subplot(1,1,1)
         textypos=0.9
@@ -699,27 +704,27 @@ def galproc(galaxy):
         #    plt.plot(RFull*(1.+z),full_template(*nnsol_cov[i,:]),'gray',lw=3,alpha=0.1,zorder=-1)
         #plt.plot(RFull*(1.+z),full_template(*nnsol),'k',label='Total',lw=3,alpha=0.8)
 
-        SF=stellar(*nnsol[:(steltemp)])*igm_factor
-        AGN=agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor
-        IR=full_ir(nnsol[(total-irtemp):],minsol)*igm_factor
+        #SF=stellar(*nnsol[:(steltemp)])*igm_factor
+        #AGN=agnpl(nnsol[steltemp:steltemp+agntemp])*igm_factor
+        #IR=full_ir(nnsol[(total-irtemp):],minsol)*igm_factor
 
-        if radio:
-            #RADIO=rad_flux(RFull*(1.+z))
-            RADIO=rad_flux(RFull*(1.+z),method=radio_method,alpha=-0.75,use_K=False)
-            TOTAL=SF+AGN+IR+RADIO
-        else:
-            TOTAL=SF+AGN+IR
+        #if radio:
+        #    #RADIO=rad_flux(RFull*(1.+z))
+        #    RADIO=rad_flux(RFull*(1.+z),method=radio_method,alpha=-0.75,use_K=False)
+        #    TOTAL=SF+AGN+IR+RADIO
+        #else:
+        #    TOTAL=SF+AGN+IR
 
         #radio_bands=np.array([30000,200000])
         #radio_points=np.array([1.1, 22.4])*10**-3
         #e_radio_points=np.array([1.1, 6.4])*10**-3
 
-        plt.fill_between(RFull*(1.+z),0,SF,color='royalblue',alpha=0.2,label='Stellar')
-        plt.fill_between(RFull*(1.+z),0,AGN,color='g',alpha=0.2,label='AGN')
-        plt.fill_between(RFull*(1.+z),0,IR,color='maroon',alpha=0.2,label='Dust')
+        ax.fill_between(RFull*(1.+z),0,SF,color='royalblue',alpha=0.2,label='Stellar')
+        ax.fill_between(RFull*(1.+z),0,AGN,color='g',alpha=0.2,label='AGN')
+        ax.fill_between(RFull*(1.+z),0,IR,color='maroon',alpha=0.2,label='Dust')
 
 
-        plt.plot(RFull*(1.+z),TOTAL,'k',label='Total',lw=3,alpha=0.6,zorder=10)
+        ax.plot(RFull*(1.+z),TOTAL,'k',label='Total',lw=3,alpha=0.6,zorder=10)
 
 
         #plt.plot(wav_ar,np.sum(nnsol*bestfit.T,axis=1),'bo')
@@ -729,8 +734,8 @@ def galproc(galaxy):
         points=((flux/flux_e_orig)>=3)
 
 
-        plt.errorbar(wav_ar[points],flux[points],yerr=flux_e_orig[points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
-        plt.scatter(wav_ar[~points],(flux+3*flux_e_orig)[~points],marker=r'$\downarrow$',s=300,color='red',zorder=11)
+        ax.errorbar(wav_ar[points],flux[points],yerr=flux_e_orig[points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
+        ax.scatter(wav_ar[~points],(flux+3*flux_e_orig)[~points],marker=r'$\downarrow$',s=300,color='red',zorder=11)
 
         #if radio:
         #   points_radio=((radio_points/e_radio_points)>=3)
@@ -738,21 +743,20 @@ def galproc(galaxy):
         #   plt.scatter(radio_bands[~points_radio],(radio_points+3*e_radio_points)[~points_radio],marker=r'$\downarrow$',s=300,color='b',zorder=11)
 
 
-        plt.text(0.02, 0.85,'ID '+str(int(P[galaxy_index,0])), color='k',fontsize=20,transform=ax.transAxes)
-        plt.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
+        ax.text(0.02, 0.85,'ID '+str(int(galaxy_id)), color='k',fontsize=20,transform=ax.transAxes)
+        ax.text(0.02, 0.75,r'z={:.2f}'.format(z), color='k',fontsize=20,transform=ax.transAxes)
 
-        ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
-        xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
-        legend(fontsize=12)
-        ylim(10**-4,10**3)
-        xlim(.5,10**5.7)
-        grid(alpha=0.4)
-        yscale('log')
-        xscale('log')
+        ax.set_ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
+        ax.set_xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
+        ax.legend(fontsize=12)
+        ax.set_ylim(10**-4,10**3)
+        ax.set_xlim(.5,10**5.7)
+        ax.grid(alpha=0.4)
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+
         plt.tight_layout()
-
-        if diagplot:
-            show()
+        show()
 
     #----------------------------------------------------------------------------------------
 
@@ -761,7 +765,7 @@ def galproc(galaxy):
         print ('Finished fitting ID:',P[galaxy_index,0])
         print('------------------------------------------')
 
-    R=np.array([int(P[galaxy_index,0]),Lir_total,eLir_total,Mdust,eMD,z,chi2_reduced,fagn,efagn,
+    R=np.array([int(galaxy_id),Lir_total,eLir_total,Mdust,eMD,z,chi2_reduced,fagn,efagn,
     lastdet,Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
     Mgas/Mstar,Lir_med,Lir_med_err,Mdust_med,Mdust_med_err,Umin[minsol[0]],minsol[1],
     g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine,mass,eMstar,mass_K,chi2,nfilt])

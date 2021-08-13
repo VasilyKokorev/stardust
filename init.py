@@ -30,8 +30,6 @@ pi=np.pi
 #===============================================================================
 
 DATA=Table.read(f'{cat_name}', memmap=True)
-lst=[10041706,10100707]
-DATA=DATA[np.isin(DATA['ID'],lst)]
 
 print(f'Read a catalogue with {len(DATA)} objects')
 
@@ -135,17 +133,17 @@ total=steltemp+agntemp+irtemp
 
 detection_threshold=3 #In sigma
 ir_detections=3 #
-ir_cutoff=20.
+ir_cutoff=20
 #===============================================================================
 
 if impose_cut:
-    zphot=DATA['zphot']
-    ztype=np.ones(len(zphot))
-    zbest=DATA['zspec']
-    zspec=DATA['zspec']
-    ztype[zbest<=0]=0
-    zbest[zbest<=0]=zphot[zbest<=0]
-    DATA['zphot']=zbest
+   zphot=DATA['zphot']
+   ztype=np.ones(len(zphot))
+   zbest=DATA['zspec']
+   zspec=DATA['zspec']
+   ztype[zbest<=0]=0
+   zbest[zbest<=0]=zphot[zbest<=0]
+   DATA['zphot']=zbest
 else:
     ztype=np.array([1]*len(DATA))
 
@@ -181,10 +179,10 @@ if impose_cut:
     ir_det=[]
     for i,obj in enumerate(SN[:,0]):
         a=SN[i,:]
-        b=W[i,:]/(1+zbest[i])
+        b=W[i,:]/(1+0)
         a=a[b>=ir_cutoff]
         det3=len(a[a>=detection_threshold])
-        if det3>=ir_detections and P[i,1]>0:
+        if det3>=ir_detections:
             #ir_det.append(det3)
             mask.append(i)
     G=G[mask]
@@ -193,11 +191,11 @@ if impose_cut:
     W=W[mask]
     print(f'Specified {ir_detections} detections beyond {ir_cutoff} microns rest frame')
 
+
 #===============================================================================
 
 print('Data loaded')
 print('Objects to fit:',len(G[:,0]))
-
 #===============================================================================
 
 if save_fig:

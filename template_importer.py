@@ -50,6 +50,9 @@ t_param=Table.read('templates/fsps_QSF_12_v3_narrow.param.fits')
 
 
 RFull=np.array(OT['lambda'])
+
+ir_range=np.array([find_nearest(RFull,8),find_nearest(RFull,1000)+1])
+
 ltn=(RFull**2)*(3*10**8)**-1
 
 OT_arr_flux=OT_arr[1:,:]

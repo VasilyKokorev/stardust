@@ -104,8 +104,8 @@ def convolver(sedx,sedy,lam,T,obs):
         #sedy=f(lam)
     #integrator=sp.integrate.simps
     integrator=np.trapz
-    return obs*integrator(T*sedy*lam**-1,lam)/integrator(T,lam)
-    #return integrator(T*sedy*lam**-1,lam)/integrator(T/lam,lam)
+    #return obs*integrator(T*sedy*lam**-1,lam)/integrator(T,lam)
+    return integrator(T*sedy/lam,lam)/integrator(T/lam,lam)
 
 
 def integrate_filter(sedx,sedy,lam,T,scale=1., z=0):
@@ -154,8 +154,11 @@ def interp_conserve(x, xp, fp, left=0., right=0.):
     return outy
 
 
+#import functions_c
+
 def convolver_(sedx,sedy,lam,T,obs):
-    templ_filter = interp_conserve(lam, sedx,sedy, left=0, right=0)
+    interp=interp_conserve
+    templ_filter = interp(lam, sedx,sedy, left=0, right=0)
     integrator = np.trapz
     temp_int = integrator(T*templ_filter/lam, lam)/integrator(T/lam, lam)
 
@@ -384,6 +387,8 @@ def filter_cont(lmbd,w,dx):
     of=np.array([fltrx,fltry])
     of=np.swapaxes(of,0,1)
     return Table(of)
+
+
 
 def make_output_table(table_out):
     outputnames=['ID','LIR_total','eLIR_total','MD',
