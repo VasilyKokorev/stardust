@@ -1,11 +1,14 @@
 'INPUT PARAMETERS'
 #===============================================================================
-#cat_name='/Users/vasily/Documents/Tables/sdc+laigle_corrected_mw.fits'
 cat_name='example/stellar+ir/c2015_sdc2_example.fits'
 
 bands_file='example/stellar+ir/example.bands'
 param_file='example/stellar+ir/example.param'
 
+extra_bands_file=''
+
+band_file='example/stellar+ir/example.bands'
+param_file='example/stellar+ir/example.param'
 extra_bands_file=''
 
 #===============================================================================
@@ -36,9 +39,9 @@ diagplot=1
 radio=1
 radio_method='delv20'
 
-save_fig=1
+save_fig=0
 save_table=1
-save_sed=1
+save_sed=0
 save_covar=0
 
 impose_cut=0

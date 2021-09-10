@@ -476,12 +476,14 @@ def galproc(galaxy):
 
 
     coeffs_rest = (b1**-1*nnsol[:12].T*to_physical).T
+    coeffs_norm = nnsol[:12]/np.sum(nnsol[:12])
 
     # Remove unit (which should be null)
     coeffs_rest = np.array(coeffs_rest)
 
     mass = coeffs_rest.dot(t_param['mass'])
     sfr = coeffs_rest.dot(t_param['sfr'])
+    av = coeffs_norm.dot(t_param['Av'])
     #print(np.log10(mass))
     print('cat_mass', "%.4g" % Mstar)
 
@@ -768,7 +770,7 @@ def galproc(galaxy):
     R=np.array([int(galaxy_id),Lir_total,eLir_total,Mdust,eMD,z,chi2_reduced,fagn,efagn,
     lastdet,Mgas,eMG,deltaGDR,attempt,Mstar,100*Mdust/Mstar,
     Mgas/Mstar,Lir_med,Lir_med_err,Mdust_med,Mdust_med_err,Umin[minsol[0]],minsol[1],
-    g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine,mass,eMstar,mass_K,chi2,nfilt])
+    g[minsol[2]],U,sU,Lagn,eLagn,Lir_draine,eLir_draine,mass,eMstar,mass_K,chi2,nfilt,sfr,av])
 
     nnsol=np.array(nnsol)
 

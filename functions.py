@@ -395,7 +395,7 @@ def make_output_table(table_out):
                  'eMD','z','chi2_red','f_agn','efagn','lastdet','MG','eMG',
                  'deltaGDR','attempts','Mstar','fgas','fgas_FMR','Lir_med',
                  'eLir68','Mdust_med','eMdust68','Umin','qpah','gamma','U','sU',
-                 'Lagn','eLagn','Lir_draine','eLir_draine','mass','e_mass','mass_K','chi2','nfilt']
+                 'Lagn','eLagn','Lir_draine','eLir_draine','mass','e_mass','mass_K','chi2','nfilt','sfr_opt','Av']
 
     dtype=[float]*len(outputnames)
     dtype[0]=int
