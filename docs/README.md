@@ -36,7 +36,7 @@ Create the params file as shown [here](https://github.com/VasilyKokorev/stardust
 
 The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some of the objects in your catalogue have ALMA photometry available for them.
 
-To parse those a separate text file is required, see [example](https://github.com/VasilyKokorev/ctf/blob/master/example/example.bands_extra):
+To parse those a separate text file is required, see [example](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands_extra):
 
 **Column I:** Wavelength column name.
 
