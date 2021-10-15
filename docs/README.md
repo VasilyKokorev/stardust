@@ -16,7 +16,7 @@ Create a text file that contains the following information:
 (this would be changed in future versions)
 
 
-Use this [template](https://github.com/VasilyKokorev/ctf/blob/master/example/example.bands) as an example for the input bands.
+Use this [template](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands) as an example for the input bands.
 
 Any text format that can be read by numpy.loadtxt should work.
 
