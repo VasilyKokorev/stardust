@@ -29,7 +29,7 @@ Additionally it is possible to give the stellar mass (in units of Msol), if one 
 
 If stellar mass is not available in your catalogue the mstar_colname should be given as *None*
 
-Create the params file as shown [here](https://github.com/VasilyKokorev/ctf/blob/master/example/example.param).
+Create the params file as shown [here](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.param).
 
 
 ## Non-standard photometric bands
