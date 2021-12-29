@@ -21,7 +21,7 @@ Create the params file as shown [here](https://github.com/VasilyKokorev/stardust
 
 The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some fluxes in your catalogue come from collapsing the spectrum, and do not have a defined filter (e.g. ALMA).
 
-To parse those a separate text file is required, see [example](https://github.com/VasilyKokorev/stardust/blob/master/example/ir_only/example.bands_extra):
+To parse those a separate text file is required, see [example](https://github.com/VasilyKokorev/stardust/blob/master/example/extra_bands/fv.bands_extra):
 
 **Column I:** Wavelength column name.
 
@@ -47,9 +47,9 @@ Missing photometry/redshift etc. should have a value of **-99**.
 
 # Creating a config file: 
 -----
-A config file contains paths to your data, the translate and param files, as well as the output folders. This is also a place where you can specify the units of the catalogue. See the example here XXX. You can also change the config parameters manually when you load in the module.
+A config file contains paths to your data, the translate and param files, as well as the output folders. This is also a place where you can specify the units of the catalogue. See the example [here](https://github.com/VasilyKokorev/stardust/blob/master/example/example.config). You can also change the config parameters manually when you load in the module.
 
 # Starting a run: 
 -----
 
-See a jupyter notebook example on how to fit single objects/catalogues with stardust, and display the outputs.
+See a [jupyter notebook example](https://github.com/VasilyKokorev/stardust/blob/master/example/Stardust_Example.ipynb) on how to fit single objects/catalogues with stardust, and display the outputs.
