@@ -1,44 +1,16 @@
 # Preparing a run
 -----
 ## Translate File
-Create a translate file between the photometry and stardust filter file. Should contain the filter id and the correspinding names for flux entries in the catalogue.
-i.e.
-
-#New translate file 
-
-FILTER_ID FLUX FLUX_UNCERTAINTY 
-
-See example here XXX and the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) for filter ids.
+Create a translate file between the photometry and stardust filter file. Should contain the filter id and the correspinding names for flux and flux uncertainty entries in the catalogue. Follow [this example](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands).
 
 
-# Defining band names and parameters: 
------
-
-## Bands
-
-Create a text file that contains the following information:
-
-**Column I:** Filter **ID** as given in the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) file.
-
-**Column II:** Flux column name.
-
-**Column III:** Error column name.
-
-**<ins>The input flux and flux errors must be in mJy!</ins>**
-
-(this would be changed in future versions)
-
-
-Use this [template](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands) as an example for the input bands.
-
-Any text format that can be read by numpy.loadtxt should work.
-
+Also see here [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) for filter ids.
 
 ## Parameters
 
-The software requires for a given object to have an **ID** and a **redshift**. 
+Stardust requires for each object to have an **ID** and a **redshift**
 
-Additionally it is possible to give the stellar mass (in units of Msol), if one wishes to compute the gas-to-dust ratio and gas mass.
+Additionally it is possible to give the stellar mass (in units of Msol), if one wishes to compute the gas-to-dust ratio and gas mass in the abscence of UV-optical photometry.
 
 If stellar mass is not available in your catalogue the mstar_colname should be given as *None*
 
@@ -47,7 +19,7 @@ Create the params file as shown [here](https://github.com/VasilyKokorev/stardust
 
 ## Non-standard photometric bands
 
-The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some of the objects in your catalogue have ALMA photometry available for them.
+The code also allows for a manual input of a wavelength for a given measurement. This can be useful when e.g. some fluxes in your catalogue come from collapsing the spectrum, and do not have a defined filter (e.g. ALMA).
 
 To parse those a separate text file is required, see [example](https://github.com/VasilyKokorev/stardust/blob/master/example/ir_only/example.bands_extra):
 
@@ -61,7 +33,7 @@ To parse those a separate text file is required, see [example](https://github.co
 
 This creates a square-wave, centred at the defined wavelegnth with a width of 10 microns.
 
-Do not forget to set **extra_bands** to **True** in [init.py](https://github.com/VasilyKokorev/ctf/blob/master/init.py).
+Do not forget to set **EXTRA_BANDS=1** in your config file.
 
 # Preparing the input catalogue: 
 -----
