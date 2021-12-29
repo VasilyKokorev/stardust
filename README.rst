@@ -1,6 +1,6 @@
 ``Stardust``: Composite Template Fitting Software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This repository provides an SED fitting tool, primarily focused on the IR part of the spectrum.
+This repository provides a panchromatic SED fitting algorithm to fit astronomical data.
 
 
 Requirements: 
