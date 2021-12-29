@@ -1,23 +1,28 @@
 'INPUT PARAMETERS'
 #===============================================================================
-cat_name='example/stellar+ir/c2015_sdc2_example.fits'
+#cat_name='example/stellar+ir/c2015_sdc2_example.fits'
+cat_name='/users/vasily/documents/tables/sdc+laigle_corrected_mw.fits'
 
-bands_file='example/stellar+ir/example.bands'
-param_file='example/stellar+ir/example.param'
+#bands_file='example/stellar+ir/example.bands'
+#param_file='example/stellar+ir/example.param'
+
+bands_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2015.bands'
+param_file='/Users/vasily/Documents/PhD/Projects/release/configs/vk/cosmos2015.param'
 
 extra_bands_file=''
 
-band_file='example/stellar+ir/example.bands'
-param_file='example/stellar+ir/example.param'
-extra_bands_file=''
+#band_file='example/stellar+ir/example.bands'
+#param_file='example/stellar+ir/example.param'
+#extra_bands_file=''
 
 #===============================================================================
 
 'OUTPUT PARAMETERS'
 #===============================================================================
-PATH = 'example/stellar+ir/output/'
+#PATH = 'example/stellar+ir/output/'
+PATH='/Users/vasily/Documents/PhD/Projects/release/output/giants_md100'
 
-output_name='stellar+ir_example_output' #Name of output table
+output_name='giants_md100' #Name of output table
 
 figloc=f'{PATH}figures/' #Location of figures
 
@@ -39,9 +44,9 @@ diagplot=1
 radio=1
 radio_method='delv20'
 
-save_fig=0
+save_fig=1
 save_table=1
-save_sed=0
+save_sed=1
 save_covar=0
 
 impose_cut=0

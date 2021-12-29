@@ -33,6 +33,10 @@ DATA=Table.read(f'{cat_name}', memmap=True)
 
 print(f'Read a catalogue with {len(DATA)} objects')
 
+idlist=np.array([10005858, 10041604, 10058901, 10008072, 10002668,   456070, 10040313,   803559,
+ 10216749,   878092,   991768, 10195571, 10259488, 10099696])
+
+DATA=DATA[np.isin(DATA['id'],idlist)]
 
 if save_table:
     table_out=(f'{PATH}{output_name}.fits')

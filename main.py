@@ -554,7 +554,6 @@ def galproc(galaxy):
             Mdust_cov=DG_ratio*nnsol_cov_sum*b*(const.m_p/const.M_sun)
             coeffs_rest = (b1**-1*nnsol_cov[:,:12].T*to_physical).T
             coeffs_rest = np.array(coeffs_rest)
-            #mass_cov = coeffs_rest.dot(t_param['mass'])
             mass_cov=np.tensordot(coeffs_rest,t_param['mass'],axes=1)
 
             for x,obj in enumerate(nnsol_cov[:,0]):
