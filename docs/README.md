@@ -1,3 +1,16 @@
+# Preparing a run
+-----
+## Translate File
+Create a translate file between the photometry and stardust filter file. Should contain the filter id and the correspinding names for flux entries in the catalogue.
+i.e.
+
+#New translate file 
+
+FILTER_ID FLUX FLUX_UNCERTAINTY 
+
+See example here XXX and the [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) for filter ids.
+
+
 # Defining band names and parameters: 
 -----
 
