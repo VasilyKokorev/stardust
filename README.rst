@@ -17,7 +17,8 @@ Requirements:
        
 Installation:
 ~~~~~~~~~~~~~
-It is recommended to create a separate (**Python==3.6.10**) environment with miniconda. See instructions 'here, <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>'
+It is recommended to create a separate (**Python==3.6.10**) 
+environment with miniconda. See instructions `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`__
     .. code:: bash
     
         $ git git@github.com:VasilyKokorev/stardust.git
