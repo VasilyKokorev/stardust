@@ -45,12 +45,11 @@ In principle any astropy.Table readable table format, with column names is parsa
 
 Missing photometry/redshift etc. should have a value of **-99**.
 
+# Creating a config file: 
+-----
+A config file contains paths to your data, the translate and param files, as well as the output folders. This is also a place where you can specify the units of the catalogue. See the example here XXX. You can also change the config parameters manually when you load in the module.
 
 # Starting a run: 
 -----
 
-(Very preliminary)
-
-Navigate to the [init.py](https://github.com/VasilyKokorev/ctf/blob/master/config.py) and provide the paths for the input catalogue, bands and param files, as well as a path to the output directory.
-
-Run ``main.py`` with **Python 3.6** or above.
+See a jupyter notebook example on how to fit single objects/catalogues with stardust, and display the outputs.
