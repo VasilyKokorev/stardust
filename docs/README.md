@@ -38,9 +38,10 @@ Do not forget to set **EXTRA_BANDS=1** in your config file.
 # Preparing the input catalogue: 
 -----
 
-Currently the only accepted table format is **.fits**.
+The catalogue should contain all the columns that you listed in the ***.param** and **.bands** files.
+Ensure that the all flux columns have consistent units.
 
-This file must contain columns containing the object id, redshift and photometry with uncertainties, as outlined in the previous section.
+In principle any astropy.Table readable table format, with column names is parsable. It is however strongly encouraged to use .fits files.
 
 Missing photometry/redshift etc. should have a value of **-99**.
 
