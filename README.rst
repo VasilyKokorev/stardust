@@ -7,11 +7,11 @@ Requirements:
 ~~~~~~~~~~~~~
     .. code:: 
     
-
+       Python==3.6.10
        numpy
        scipy
        astropy
-       multiprocessing
+       multiprocess
        
 Installation:
 ~~~~~~~~~~~~~
