@@ -7,7 +7,7 @@ Requirements:
 ~~~~~~~~~~~~~
     .. code:: 
     
-       Python==3.6.10
+       **python==3.6.10**
        numpy
        scipy
        astropy
