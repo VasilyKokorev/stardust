@@ -4,7 +4,7 @@
 The translate **.bands** file should contain the filter id and the correspinding names for flux and flux uncertainty entries in the catalogue. Please follow [this example](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands).
 
 
-Also see here [filters/filters.info](https://github.com/VasilyKokorev/ctf/blob/master/filters/filters.info) for filter ids.
+Also see here [filters/filters.info](https://github.com/VasilyKokorev/stardust/blob/master/stardust/filters/filters.info) for filter ids.
 
 ## Parameters
 
