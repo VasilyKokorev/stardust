@@ -24,7 +24,7 @@ You can then pull stardust and install it with pip.
 
     .. code:: bash
     
-        $ git git@github.com:VasilyKokorev/stardust.git
+        $ git clone https://github.com/VasilyKokorev/stardust.git
         $ cd stardust
         $ pip install .
   
