@@ -43,7 +43,7 @@ See the `quickstart guide <https://github.com/VasilyKokorev/ctf/blob/master/docs
 
 Troubleshooting:
 ~~~~~~
-1) The module does not install: If you are on linux, try using Python 3.9.1 instead.
+1) ***The module does not install:*** If you are on linux, try using Python 3.9.1 instead.
 
 Contacts:
 ~~~~~~
