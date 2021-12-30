@@ -1,6 +1,17 @@
 ``Stardust``: Composite Template Fitting Software
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This repository provides a panchromatic SED fitting algorithm to fit astronomical data.
+**Stardust** is a Python package which is designed to extract galaxy properties by fitting their multiwavelength data to a set of linearly combined templates. 
+
+This algorithm brings together three different families of templates:
+
+1) UV+Optical emission from dust unobscured stellar light
+
+2) AGN heated dust in the MIR
+
+3) IR dust reprocessed stellar light in the NIR-FIR
+
+One of the features of **Stardust** is that the template fitting does not rely on energy balance. As a result the total luminosity of dust obscured and dust unobscured stellar light do not rely on each other, and it is possible to fit object (e.g. SMGs) where the energy balance approach might not be necessarily applicable.
+
 
 
 Requirements: 
