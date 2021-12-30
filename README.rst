@@ -10,7 +10,7 @@ This algorithm brings together three different families of templates:
 
 3) IR dust reprocessed stellar light in the NIR-FIR
 
-One of the features of **Stardust** is that the template fitting does not rely on energy balance. As a result the total luminosity of dust obscured and dust unobscured stellar light do not rely on each other, and it is possible to fit object (e.g. SMGs) where the energy balance approach might not be necessarily applicable. Detailed description of **Stardust** and its first application are described in  `Kokorev et al. 2021, <https://ui.adsabs.harvard.edu/abs/2021ApJ...921...40K/abstract>`__.
+One of the features of **Stardust** is that the template fitting does not rely on energy balance. As a result the total luminosity of dust obscured and dust unobscured stellar light do not rely on each other, and it is possible to fit object (e.g. SMGs) where the energy balance approach might not be necessarily applicable. Detailed description of **Stardust** and its first application are presented in  `Kokorev et al. 2021, <https://ui.adsabs.harvard.edu/abs/2021ApJ...921...40K/abstract>`__.
 
 
 
