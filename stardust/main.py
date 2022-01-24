@@ -48,15 +48,15 @@ ir_cutoff=20
 
 class ctf(object):
 
-    def __init__(self, config_file=None):
+    def __init__(self, config_file=None,idx = None):
 
         
         self.config_file = config_file
 
-        self.filters_all=filters
+        self.filters_all = filters
 
         self.read_config()
-        self.read_catalogue()
+        self.read_catalogue(idx=idx)
         self.make_template_grid()
         self.prepare_products()
 
@@ -66,7 +66,7 @@ class ctf(object):
         """
         READ THE CONFIG FILE
         """
-        self.config={}
+        self.config = {}
 
         f = open(self.config_file,'r')
         lines = f.readlines()
@@ -84,7 +84,7 @@ class ctf(object):
 
         return None
 
-    def read_catalogue(self):
+    def read_catalogue(self, idx = None, cleanup=True):
         """
         READ THE INPUT CATALOGUE
         ADD THE NECESSARY FILTERS TO FILTER LIST
@@ -96,6 +96,9 @@ class ctf(object):
             self.data = Table.read(self.config['CATALOGUE'])
         except:
             self.data = Table.read(self.config['CATALOGUE'], format='ascii')
+        
+        if idx is not None:
+            self.data = self.data[idx[0]:idx[1]]
             
         print(f'Read a catalogue with {len(self.data)} objects')
 
@@ -120,6 +123,7 @@ class ctf(object):
 
         filt_id=np.int_(filtname).tolist()
 
+
         #Append the filters to be used later on
 
         self.filters=[]
@@ -134,7 +138,6 @@ class ctf(object):
             for index,s in enumerate(lspl):
                 if 'lambda' in s:
                     self.sfx.append(lspl[index+1])
-
         self.sfx=1e-4*np.float_(self.sfx) #Convert central wavelength to microns
 
         assert len(self.fnames)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
@@ -173,6 +176,7 @@ class ctf(object):
         self.efnu*=self.convert_to_mjy(self.config['FLUX_UNIT'])
 
         self.NOBJ = len(self.fnu)
+
 
 
         print('Data Loaded Successfully')
@@ -284,6 +288,15 @@ class ctf(object):
         self.umin = np.zeros(self.NOBJ)
         self.qpah = np.zeros(self.NOBJ)
         self.gamma = np.zeros(self.NOBJ)
+
+        for i in range(self.NOBJ):
+            sn = self.fnu[i]/self.efnu[i]
+            rf = (1+self.zcat[i])*self.sfx
+            try: 
+                self.lastdet[i] = (rf[sn>=3][-1])
+            except:
+                self.lastdet[i] = - 99.
+            
         
         
         if self.config['SAVE_TABLE']:
@@ -723,7 +736,7 @@ class ctf(object):
 
         A = np.vstack((self.fconv_optical.T,self.fconv_agn.T,np.zeros_like(self.fconv_agn[:,0])))
 
-        
+
         for i,_ in enumerate(self.fconv_ir[0,:,0,0]):
                 for j,_ in enumerate(self.fconv_ir[0,0,:,0]):
                     for k,_ in enumerate(self.fconv_ir[0,0,0,:]):
@@ -731,6 +744,8 @@ class ctf(object):
                         B[-1,:] = self.fconv_ir[:,i,j,k]
                         B = B[:,to_fit]
                         B = B/efnu
+                        if np.sum(~np.isfinite(B))>0:
+                            continue
                         try:
                             coeffs_obj[:,i,j,k],chi_obj[i,j,k] = sp.optimize.nnls(B.T,fnu/efnu)
                         except Exception as e:
@@ -857,6 +872,7 @@ class ctf(object):
         self.e_mdust[idx] = utils.to_sigma(mdust_cov)
         self.e_mgas[idx] = self.deltaGDR[idx] * utils.to_sigma(mdust_cov)
 
+        self.e_sfr = self.e_lir*10**-10
         self.e_avu = utils.to_sigma(lir_cov/(125*mdust_cov))
 
         return None
@@ -882,7 +898,12 @@ class ctf(object):
 
         cov = np.matrix(np.dot(nonzeroA.T, nonzeroA)).I.A
 
-        covsam = np.random.multivariate_normal(self.best_coeffs[idx,nonzero_mask],cov,5*10**3)
+        try:
+            covsam = np.random.multivariate_normal(self.best_coeffs[idx,nonzero_mask],cov,5*10**3)
+        except Exception as e:
+            print(e)
+            resampled_coeffs=np.zeros((len(self.best_coeffs[idx,nonzero_mask]),self.best_coeffs.shape[1]))
+            return resampled_coeffs
 
         incl_val = []
 
@@ -944,7 +965,7 @@ class ctf(object):
             met_PP04=569.4927-192.51820*met_KD02+21.918360*met_KD02**2-0.8278840*met_KD02**3
             deltaGDR=10**(10.54-0.99*met_PP04)
         else:
-            print('Failed to compute deltaGDR')
+            #print('Failed to compute deltaGDR')
             deltaGDR=-99
 
         return deltaGDR
@@ -1003,6 +1024,20 @@ class ctf(object):
 
         return None
 
+    def get_obs_flux(self,idx,filter_x,filter_y):
+
+        irdx = np.int_(self.best_ir_idx[idx])
+
+        sed_x = self.templ  * (1+self.zcat[idx])
+        sed_opt = np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
+        sed_agn = np.sum(self.best_coeffs[idx,-3:-1]*self.agn_grid,axis = 1)
+        sed_ir = self.best_coeffs[idx,-1]*self.dustnorm*self.ir_grid[:,irdx[0],irdx[1],irdx[2]]
+
+        sed_tot = sed_opt + sed_agn + sed_ir
+
+        obs_flux = self.convolver(sed_x,sed_tot,filter_x,filter_y)
+
+        return obs_flux
 
     def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False):
         
@@ -1050,7 +1085,7 @@ class ctf(object):
             xlim = xlim
             ax.set_xlim(xlim[0],xlim[1])
 
-        if xlim is not None:
+        if ylim is not None:
             ylim = ylim
             ax.set_ylim(ylim[0],ylim[1])
 
@@ -1218,7 +1253,7 @@ class ctf(object):
                 print(self.id[idx])
         return None
 
-    def fit_catalogue(self,n_proc=-1,n_obj=None):
+    def fit_catalogue(self, n_proc=-1,n_obj=None):
         '''
         Main function to fit the full catalogue
         Outputs the ctf class object with all the parameters
@@ -1289,6 +1324,8 @@ class ctf(object):
         return None
 
     def save_results(self):
+
+        #Ignore this list
         outputnames=['id','z','mstar_input',
                         'lir_tot','e_lir_tot','lir','e_lir','lir_agn','e_lir_agn', #Luminosity
                         'f_agn','e_f_agn', #AGN

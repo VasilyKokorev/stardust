@@ -24,5 +24,8 @@ def to_sigma(arr):
         '''
         Compute the uncertainty from confidence intervals
         '''
-        perc = np.percentile(arr,q=[16,50,84])
+        try:
+            perc = np.percentile(arr,q=[16,50,84])
+        except:
+            return -99.
         return np.mean([perc[2]-perc[1],perc[1]-perc[0]])
