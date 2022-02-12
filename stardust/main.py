@@ -48,7 +48,9 @@ ir_cutoff=20
 
 class ctf(object):
 
-    def __init__(self, config_file=None,idx = None):
+    def __init__(self, idx = None,config_file=None,**kwargs):
+        
+        self.kwargs = kwargs
 
         
         self.config_file = config_file
@@ -57,7 +59,7 @@ class ctf(object):
 
         self.read_config()
         self.read_catalogue(idx=idx)
-        self.make_template_grid()
+        self.make_template_grid(**kwargs)
         self.prepare_products()
 
         return None
@@ -338,7 +340,7 @@ class ctf(object):
         return None
 
 
-    def make_template_grid(self,diagnostic_optical=False):
+    def make_template_grid(self,diagnostic_optical=False,**kwargs):
         '''
          Load optical templates, define common wavelength range
          Load AGN templates
@@ -387,7 +389,7 @@ class ctf(object):
 
         self.add_agn_templates()
 
-        self.add_ir_templates()
+        self.add_ir_templates(**kwargs)
 
         self.dustnorm = (10**10*(const.M_sun/const.m_p)).value
 
@@ -422,7 +424,7 @@ class ctf(object):
         return None
 
 
-    def add_ir_templates(self,custom_gamma=None,custom_qpah_indices=None,custom_umin_indices=None,diagnostic_plot=False):
+    def add_ir_templates(self,diagnostic_plot=False,**kwargs):
         """
         CONFIGURE AND LOAD Draine & Li 2014 templates
         """
@@ -451,18 +453,18 @@ class ctf(object):
         if not self.config['USE_COLD_DL']:
             custom_umin_indices = range(len(self.templ_umin[self.templ_umin>=0.800]))
 
-        if custom_umin_indices is None:
+        if kwargs['custom_umin_indices'] is None:
             self.umin_indices = range(len(self.templ_umin))
         else:
-            self.umin_indices = custom_umin_indices
-            self.templ_umin = self.templ_umin[custom_umin_indices]
+            self.umin_indices = kwargs['custom_umin_indices']
+            self.templ_umin = self.templ_umin[self.umin_indices]
 
-        if custom_qpah_indices is None:
+        if kwargs['custom_qpah_indices'] is None:
             self.q_indices = range(len(diffuse[0,0,:]))
         else:
-            self.q_indices = custom_qpah_indices
+            self.q_indices = kwargs['custom_qpah_indices']
 
-        if custom_gamma is None:
+        if kwargs['custom_gamma'] is None:
             g1=np.array([0,0.001,0.0025,0.005,0.0075])
             #g2=np.arange(0.01,0.1,0.01) #Too many gamma values, reduce
             g2=np.arange(0.01,0.1,0.05)
@@ -470,7 +472,7 @@ class ctf(object):
             self.templ_gamma=np.concatenate((g1,g2,g3))
 
         else:
-            self.templ_gamma = custom_gamma
+            self.templ_gamma = kwargs['custom_gamma']
 
         mesh = np.ix_(range(diffuse.shape[0]),self.umin_indices,self.q_indices)
         diffuse = diffuse[mesh]
