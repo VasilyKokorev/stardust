@@ -44,15 +44,24 @@ detection_threshold=3 #In sigma
 ir_detections=3 
 ir_cutoff=20
 
+
 #===============================================================================
 
 class ctf(object):
 
     def __init__(self, idx = None,config_file=None,**kwargs):
-        
+       
         self.kwargs = kwargs
 
-        
+        try:
+            if kwargs['custom_gamma'] is None:
+                pass
+        except:
+            kwargs = {'custom_gamma': None,
+                        'custom_qpah_indices':None,
+                            'custom_umin_indices': None}
+
+
         self.config_file = config_file
 
         self.filters_all = filters
