@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from os.path import exists
 
 import numpy as np
 import scipy as sp
@@ -1472,6 +1473,10 @@ class ctf(object):
 
         if self.config['SAVE_TABLE']:
             table_out=self.config['PATH']+self.config['OUTPUT_NAME']+'.fits'
-            self.tab.write(table_out)
+            if exists(table_out):
+                print(f'Output table {table_out} already exists')
+                print('New output table was not saved, delete the old version and run "self.save_results()" again ')    
+            else:    
+                self.tab.write(table_out)
         
         return None
