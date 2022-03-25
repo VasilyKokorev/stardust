@@ -1306,6 +1306,7 @@ class ctf(object):
 
             print ('Time Elapsed:',time.time()-t0, 's')
             self.save_results()
+
             return None
 
 
@@ -1331,8 +1332,82 @@ class ctf(object):
         print('Finished Fitting, Preparing Output..')
         self.mp_restructure(mp_out)
         self.save_results()
+
+        if self.config['SAVE_FIGURE']:
+            self.save_all_figures(obj)
         print ('Time Elapsed:',time.time()-t0, 's')
+
+
         return None
+
+
+    def save_all_figures(self,obj,xlim=None,ylim=None,components=True,radio=False,detailed=False):
+
+        if self.config['SAVE_FIGURE']:
+            figloc=self.config['PATH']+'figures/'
+        
+        for idx in obj:
+            
+            irdx = np.int_(self.best_ir_idx[idx])
+
+            sed_x = self.templ  * (1+self.zcat[idx])
+            sed_opt = np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
+            sed_agn = np.sum(self.best_coeffs[idx,-3:-1]*self.agn_grid,axis = 1)
+            sed_ir = self.best_coeffs[idx,-1]*self.dustnorm*self.ir_grid[:,irdx[0],irdx[1],irdx[2]]
+
+            sed_tot = sed_opt + sed_agn + sed_ir
+
+            fig = plt.figure(figsize=(10,5))
+            ax = fig.add_subplot(1,1,1)
+
+            if components:
+                ax.fill_between(sed_x,0,sed_opt,color='royalblue',alpha=0.2,label='Stellar')
+                ax.fill_between(sed_x,0,sed_agn,color='g',alpha=0.2,label='AGN')
+                ax.fill_between(sed_x,0,sed_ir,color='maroon',alpha=0.2,label='Dust')
+
+            if radio:
+                sed_radio = self.radio_sed(idx,sed_x,alpha=-0.75)
+                sed_tot += sed_radio
+
+            ax.plot(sed_x,sed_tot,'k',label='Total',lw=3,alpha=0.6,zorder=10)
+
+            points=((self.fnu[idx]/self.efnu[idx])>=3)
+
+
+            ax.errorbar(self.wav[idx,points],self.fnu[idx,points],yerr=self.efnu[idx,points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
+            ax.scatter(self.wav[idx,~points],(self.fnu[idx,~points]+3*self.efnu[idx,~points]),marker=r'$\downarrow$',s=300,color='red',zorder=11)
+
+            ax.text(0.02, 0.85,'ID '+str(int(self.param[idx,0])), color='k',fontsize=20,transform=ax.transAxes)
+            ax.text(0.02, 0.75,r'z = {:.2f}'.format(self.zcat[idx]), color='k',fontsize=20,transform=ax.transAxes)
+
+            ax.set_ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
+            ax.set_xlabel(r'$\lambda_{obs}$ $[\mu m]$',fontsize=25)
+            ax.legend(fontsize=12)
+
+            ax.set_ylim(10**-4,10**3)
+            ax.set_xlim(.5,10**5.7)
+
+            if xlim is not None:
+                xlim = xlim
+                ax.set_xlim(xlim[0],xlim[1])
+
+            if ylim is not None:
+                ylim = ylim
+                ax.set_ylim(ylim[0],ylim[1])
+
+            ax.grid(alpha=0.4)
+            ax.loglog()
+
+            fig.savefig(f'{figloc}/{self.id[idx]}.pdf')
+            plt.close()
+
+        
+                
+        print('Saved all figures')
+
+        return None
+
+        
 
     def save_results(self):
 
@@ -1398,4 +1473,5 @@ class ctf(object):
         if self.config['SAVE_TABLE']:
             table_out=self.config['PATH']+self.config['OUTPUT_NAME']+'.fits'
             self.tab.write(table_out)
+        
         return None
