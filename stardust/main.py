@@ -119,7 +119,7 @@ class ctf(object):
 
         if self.config['VERBOSE']>0:
             print('Read band file: ' + self.config['BANDS_FILE'])
-            print('Read param file: ' + self.config['BANDS_FILE'])
+            print('Read param file: ' + self.config['PARAM_FILE'])
 
         
         filtname=bnds[:,0].tolist() #Band Filter ID
@@ -532,11 +532,11 @@ class ctf(object):
         """
         GET SHEN+16 OPTICAL QUASAR TEMPLATES INSTEAD OF BRAMMER+08
         """
-        qso_templ1=Table.read('templates/QSO/shen2016_ext_Av0.0.fits')
-        qso_templ2=Table.read('templates/QSO/shen2016_ext_Av0.1.fits')
-        qso_templ3=Table.read('templates/QSO/shen2016_ext_Av0.2.fits')
-        qso_templ4=Table.read('templates/QSO/shen2016_ext_Av0.3.fits')
-        qso_templ5=Table.read('templates/QSO/shen2016_ext_Av0.4.fits')
+        qso_templ1=Table.read(f'{templ_loc}/QSO/shen2016_ext_Av0.0.fits')
+        qso_templ2=Table.read(f'{templ_loc}/QSO/shen2016_ext_Av0.1.fits')
+        qso_templ3=Table.read(f'{templ_loc}/QSO/shen2016_ext_Av0.2.fits')
+        qso_templ4=Table.read(f'{templ_loc}/QSO/shen2016_ext_Av0.3.fits')
+        qso_templ5=Table.read(f'{templ_loc}/QSO/shen2016_ext_Av0.4.fits')
 
         qso_wave=qso_templ1['wave']
 
@@ -1472,7 +1472,7 @@ class ctf(object):
         self.tab['lastdet'] = self.lastdet
 
         if self.config['SAVE_TABLE']:
-            table_out=self.config['PATH']+self.config['OUTPUT_NAME']+'.fits'
+            table_out = self.config['PATH']+self.config['OUTPUT_NAME']+'.fits'
             if exists(table_out):
                 print(f'Output table {table_out} already exists')
                 print('New output table was not saved, delete the old version and run "self.save_results()" again ')    
