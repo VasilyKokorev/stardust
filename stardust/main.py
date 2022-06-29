@@ -1017,7 +1017,7 @@ class ctf(object):
         if not self.config['SAVE_SED']:
             return None
 
-
+        sedloc=self.config['PATH']+'seds/'
 
 
 
@@ -1032,6 +1032,16 @@ class ctf(object):
 
             sed_tot = sed_opt + sed_agn + sed_ir
 
+            table_sed = Table()
+            table_sed['lambda'] = sed_x
+            table_sed['templ_opt'] = sed_opt
+            table_sed['templ_agn'] = sed_agn
+            table_sed['templ_ir'] = sed_ir
+
+
+            table_sed.write(f'{sedloc}/{self.id[idx]}.fits')
+
+        print('Saved all SEDs')
 
 
         return None
@@ -1051,7 +1061,8 @@ class ctf(object):
 
         return obs_flux
 
-    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False):
+
+    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False,return_output=False):
         
 
         irdx = np.int_(self.best_ir_idx[idx])
@@ -1107,7 +1118,13 @@ class ctf(object):
         fig.tight_layout()
         fig.show()
 
+        if return_output:
+            output = {'lambda':sed_x,'templ_optical':sed_opt,'templ_agn':sed_agn,'templ_ir':sed_ir,
+            'pivot':self.wav[idx],'fobs':self.fnu[idx],'ferr':self.efnu[idx]}
+            return output
+
         return None
+
 
     def radio_sed(self,idx,lam,alpha=-0.75,use_own_mass=False,allow_own_mass=True):
         '''
@@ -1336,6 +1353,9 @@ class ctf(object):
 
         if self.config['SAVE_FIGURE']:
             self.save_all_figures(obj)
+
+        if self.config['SAVE_SED']:
+            self.save_sed()
         print ('Time Elapsed:',time.time()-t0, 's')
 
 
@@ -1480,3 +1500,133 @@ class ctf(object):
                 self.tab.write(table_out)
         
         return None
+
+
+
+    def set_zgrid(self):
+        'Setup the redshift grid for photoz calculation'
+
+        try:
+            zrange = [self.config['Z_MIN'],self.config['Z_MAX']]
+            zstep = self.config['Z_STEP']
+        except:
+            print('Z_MIN, Z_MAX or Z_STEP parameters are not defined in config.')
+            print('Using default values (0.01,12,0.005)')
+            zrange = [0.01,12]
+            zstep = 0.005
+
+        assert zrange[0]>0, 'Z_MIN IS ZERO OR BELOW ZERO'
+
+        self.zgrid = np.arange(*zrange,zstep)
+
+        return None
+
+    def set_ztemps(self):
+
+        self.set_zgrid()
+
+        fit_range = self.sfx<10.
+        filts = []
+        for i,wl in enumerate(self.sfx):
+            if wl<10.:
+                filts.append(self.filters[i])
+
+
+        self.fconv_optical_zgrid = np.zeros((len(self.sfx[fit_range]),len(self.zgrid),self.optical_grid.shape[1]))
+
+        #MULTIPROCESS THIS
+
+        st = time.time()
+        for j,z_i in enumerate(self.zgrid):
+            sedx = self.templ*(1+z_i)
+            for i,_ in enumerate(self.optical_grid[0,:]):
+                for f,_ in enumerate(self.sfx[fit_range]):
+                    self.fconv_optical_zgrid[f,j,i] = self.convolver(sedx,self.optical_grid[:,i],filts[f][0],filts[f][1],mode='ir')
+        print(f'Redshift Templates Ready. Time Elapsed:{time.time()-st}s')
+
+        return None
+
+
+
+    def fit_photoz(self,idx,scale_sigma=True,parallel=False):
+        """
+        FIT PHOTOZ FOR A SINGLE GALAXY
+
+        Parameters
+        --------------------
+        scale_sigma: Rescale the uncertainties by UNCERT_SCALE value in the config, default is True
+        """
+        fit_start=time.time()
+
+
+        fnu = np.copy(self.fnu[idx])
+        efnu = np.copy(self.efnu[idx])
+
+        efnu[(fnu/efnu)<=3]*=3
+
+        to_fit = fnu>1e-11
+
+        #self.usephot[idx,:] = to_fit
+
+
+        coeffs_obj = np.zeros((total,self.ir_grid.shape[1],self.ir_grid.shape[2],self.ir_grid.shape[3]))
+        chi_obj = np.zeros_like(self.ir_grid[0,:,:,:])
+
+        """
+        Masking corrupt/missing entries
+        """
+    
+        fnu = fnu[to_fit]
+        efnu = efnu[to_fit]
+        wav = self.wav[idx,to_fit]
+
+        if scale_sigma:
+            efnu[wav<=25] = np.hypot(efnu[wav<=25],self.config['UNCERT_SCALE']*fnu[wav<=25])
+            #efnu = np.hypot(efnu,self.config['UNCERT_SCALE']*fnu)
+        
+        
+        self.nfilt_zphot[idx] = len(fnu) #Number of usable bands per object
+
+        self.convolve_all_templates(idx)
+
+        A = np.vstack((self.fconv_optical.T,self.fconv_agn.T,np.zeros_like(self.fconv_agn[:,0])))
+
+
+        for i,_ in enumerate(self.fconv_ir[0,:,0,0]):
+                for j,_ in enumerate(self.fconv_ir[0,0,:,0]):
+                    for k,_ in enumerate(self.fconv_ir[0,0,0,:]):
+                        B = np.copy(A)
+                        B[-1,:] = self.fconv_ir[:,i,j,k]
+                        B = B[:,to_fit]
+                        B = B/efnu
+                        if np.sum(~np.isfinite(B))>0:
+                            continue
+                        try:
+                            coeffs_obj[:,i,j,k],chi_obj[i,j,k] = sp.optimize.nnls(B.T,fnu/efnu)
+                        except Exception as e:
+                            print(e)
+                            coeffs_obj[:,i,j,k], chi_obj[i,j,k] = np.array([0.]*total), -99
+
+        
+
+
+        chi_obj = chi_obj**2
+        best_idx = np.unravel_index(np.argmin(chi_obj),chi_obj.shape)
+        A[-1] = self.fconv_ir[:,best_idx[0],best_idx[1],best_idx[2]]
+
+        self.best_ir_idx[idx,:] = best_idx
+        self.best_coeffs[idx] = coeffs_obj[:,best_idx[0],best_idx[1],best_idx[2]]
+        self.chi2[idx] = chi_obj[best_idx[0],best_idx[1],best_idx[2]]
+
+
+       
+        if not parallel:
+            self.compute_physical_params(idx)
+            self.compute_uncertaintites_simple(idx,coeffs_obj,chi_obj,A)
+            
+            return None
+
+        if parallel:
+            output = self.mp_output(idx,coeffs_obj,chi_obj,A)
+
+            return idx, output
