@@ -170,10 +170,12 @@ class ctf(object):
         self.fnu = np.array((np.array(self.data[band_names])).tolist())
         self.efnu = np.array((np.array(self.data[err_band_names])).tolist())
         self.wav = np.tile(self.sfx,(len(self.fnu[:,0]),1))
-        self.param = np.array((np.array(self.data[param_names])).tolist())
-        self.id = self.param[:,0]
-        self.zcat = self.param[:,1]
-        self.mstar_cat = self.param[:,2]
+
+        #self.param = np.array((np.array(self.data[param_names])).tolist())
+
+        self.id = self.data[param_names[0]]
+        self.zcat = self.data[param_names[1]]
+        self.mstar_cat = self.data[param_names[2]]
 
         self.lnu_to_fnu = (1.+self.zcat)*(4.*pi*(cosmo.luminosity_distance(self.zcat)).to(u.cm).value**2)**-1
 
@@ -189,7 +191,20 @@ class ctf(object):
 
         self.NOBJ = len(self.fnu)
 
+        coord_names = np.array([['RA', 'ra', 'ALPHA_J2000', 'alpha'] ,
+                                [ 'DEC', 'dec', 'DELTA_J2000', 'delta']])
 
+        for col in self.data.colnames:
+            if col in coord_names[0]:
+                ra_col = col
+            if col in coord_names[1]:
+                dec_col = col
+        
+        try:
+            self.ra = self.data[ra_col]
+            self.dec = self.data[dec_col]
+        except:
+            print('Could not automatically assign the ra,dec columns')
 
         print('Data Loaded Successfully')
         print('Objects to Fit:',len(self.fnu[:,0]))
@@ -958,7 +973,7 @@ class ctf(object):
         if use_own_mass:
             mstar = self.mstar[idx]
         else:       
-            mstar = self.param[idx,2]
+            mstar = self.mstar_cat[idx]
         
             if mstar<=0 and allow_own_mass:
                 mstar = self.mstar[idx]
@@ -1012,7 +1027,7 @@ class ctf(object):
         return lir,lagn
 
 
-    def save_sed(self,):
+    def save_sed(self,obj):
         
         if not self.config['SAVE_SED']:
             return None
@@ -1021,7 +1036,8 @@ class ctf(object):
 
 
 
-        for idx in range(self.fnu.shape[0]):
+        #for idx in range(self.fnu.shape[0]):
+        for idx in obj:
 
             irdx = np.int_(self.best_ir_idx[idx])
 
@@ -1085,6 +1101,8 @@ class ctf(object):
         if radio:
             sed_radio = self.radio_sed(idx,sed_x,alpha=-0.75)
             sed_tot += sed_radio
+        else:
+            sed_radio = np.zeros_like(self.templ)
 
         ax.plot(sed_x,sed_tot,'k',label='Total',lw=3,alpha=0.6,zorder=10)
 
@@ -1094,7 +1112,7 @@ class ctf(object):
         ax.errorbar(self.wav[idx,points],self.fnu[idx,points],yerr=self.efnu[idx,points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
         ax.scatter(self.wav[idx,~points],(self.fnu[idx,~points]+3*self.efnu[idx,~points]),marker=r'$\downarrow$',s=300,color='red',zorder=11)
 
-        ax.text(0.02, 0.85,'ID '+str(int(self.param[idx,0])), color='k',fontsize=20,transform=ax.transAxes)
+        ax.text(0.02, 0.85,'ID '+str(self.id[idx]), color='k',fontsize=20,transform=ax.transAxes)
         ax.text(0.02, 0.75,r'z = {:.2f}'.format(self.zcat[idx]), color='k',fontsize=20,transform=ax.transAxes)
 
         ax.set_ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
@@ -1120,7 +1138,7 @@ class ctf(object):
 
         if return_output:
             output = {'lambda':sed_x,'templ_optical':sed_opt,'templ_agn':sed_agn,'templ_ir':sed_ir,
-            'pivot':self.wav[idx],'fobs':self.fnu[idx],'ferr':self.efnu[idx]}
+            'pivot':self.wav[idx],'fobs':self.fnu[idx],'ferr':self.efnu[idx],'templ_radio':sed_radio}
             return output
 
         return None
@@ -1148,7 +1166,7 @@ class ctf(object):
             if use_own_mass:
                 mstar = self.mstar[idx]
             if not use_own_mass:       
-                mstar = self.param[idx,2]
+                mstar = self.mstar_cat[idx]
 
             output=slope(self.zcat[idx],self.lir_tot[idx],mstar,lum_dist,alpha)*lam**(-alpha)
 
@@ -1282,7 +1300,7 @@ class ctf(object):
                 print(self.id[idx])
         return None
 
-    def fit_catalogue(self, n_proc=-1,n_obj=None):
+    def fit_catalogue(self, n_proc=-1,n_obj=None,save_results=True):
         '''
         Main function to fit the full catalogue
         Outputs the ctf class object with all the parameters
@@ -1349,13 +1367,15 @@ class ctf(object):
 
         print('Finished Fitting, Preparing Output..')
         self.mp_restructure(mp_out)
-        self.save_results()
 
-        if self.config['SAVE_FIGURE']:
-            self.save_all_figures(obj)
+        if save_results:
+            self.save_results()
 
-        if self.config['SAVE_SED']:
-            self.save_sed()
+            if self.config['SAVE_FIGURE']:
+                self.save_all_figures(obj)
+
+            if self.config['SAVE_SED']:
+                self.save_sed(obj)
         print ('Time Elapsed:',time.time()-t0, 's')
 
 
@@ -1398,7 +1418,7 @@ class ctf(object):
             ax.errorbar(self.wav[idx,points],self.fnu[idx,points],yerr=self.efnu[idx,points],color='red',fmt='s',capsize=5,capthick=1,ms=12,markerfacecolor='white',mew=2,barsabove=True)
             ax.scatter(self.wav[idx,~points],(self.fnu[idx,~points]+3*self.efnu[idx,~points]),marker=r'$\downarrow$',s=300,color='red',zorder=11)
 
-            ax.text(0.02, 0.85,'ID '+str(int(self.param[idx,0])), color='k',fontsize=20,transform=ax.transAxes)
+            ax.text(0.02, 0.85,'ID '+str(self.id[idx]), color='k',fontsize=20,transform=ax.transAxes)
             ax.text(0.02, 0.75,r'z = {:.2f}'.format(self.zcat[idx]), color='k',fontsize=20,transform=ax.transAxes)
 
             ax.set_ylabel(r'$f_{\nu}$ [mJy]',fontsize=25)
@@ -1446,7 +1466,9 @@ class ctf(object):
         self.tab = Table()
 
         #External
-        self.tab['id'] = np.int_(self.id)
+        self.tab['id'] = self.id
+        self.tab['ra'] = self.ra
+        self.tab['dec'] = self.dec
         self.tab['z'] = self.zcat
         self.tab['mstar_input'] = self.mstar_cat
 
