@@ -55,7 +55,7 @@ class ctf(object):
         self.kwargs = kwargs
 
         try:
-            if kwargs['custom_gamma'] is None:
+            if kwargs['custom_umin_indices'] is None:
                 pass
         except:
             kwargs = {'custom_gamma': None,
