@@ -52,6 +52,10 @@ An example data-set, a subset from the `COSMOS Super-Deblended Catalogue 2 (Jin+
 
 See the `quickstart guide <https://github.com/VasilyKokorev/ctf/blob/master/docs/README.md>`__ and `docs folder <https://github.com/VasilyKokorev/ctf/tree/master/docs>`__ for more detailed instructions.
 
+Acknowledgements:
+~~~~~~~~~~~~~
+Filters curves are adopted from `eazy-py <https://github.com/gbrammer/eazy-py>`__ by Gabe Brammer.
+
 Troubleshooting:
 ~~~~~~
 **1. The module does not install:** If you are on linux, try using Python 3.9.1 instead.
