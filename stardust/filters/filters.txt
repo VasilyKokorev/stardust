@@ -44367,7 +44367,7 @@
 2230   3.00197e+04 0.00000e+00
 2231   3.00332e+04 0.00000e+00
 2232   3.00466e+04 0.00000e+00
-   187 niriss-f090w primary_area=244789.2cm2 ABZP=28.2710 lambda_c=0.9009um 
+   187 niriss-f090w primary_area=244789.2cm2 ABZP=28.2710 lambda_c=9009
     1  6220.00 0.0000e+00
     2  6250.03 0.0000e+00
     3  6280.06 0.0000e+00
@@ -44555,7 +44555,7 @@
   185  11745.72 0.0000e+00
   186  11775.75 0.0000e+00
   187  11805.78 0.0000e+00
- 195 niriss-f115w primary_area=244789.2cm2 ABZP=28.3295 lambda_c=1.1495um
+ 195 niriss-f115w primary_area=244789.2cm2 ABZP=28.3295 lambda_c= 11495
     1  7760.00 0.0000e+00
     2  7798.32 0.0000e+00
     3  7836.63 0.0000e+00
@@ -44751,7 +44751,7 @@
   193  15116.77 2.4037e-06
   194  15155.09 2.2862e-06
   195  15193.40 2.1881e-06
- 189 niriss-f150w primary_area=244789.2cm2 ABZP=28.1836 lambda_c=1.4929um
+ 189 niriss-f150w primary_area=244789.2cm2 ABZP=28.1836 lambda_c= 14929um
     1  10240.00 3.0145e-06
     2  10289.76 3.0140e-06
     3  10339.53 2.7959e-06
@@ -44941,7 +44941,7 @@
   187  19496.25 6.3053e-06
   188  19546.01 6.1929e-06
   189  19595.78 5.9978e-06
- 191 niriss-f200w primary_area=244789.2cm2 ABZP=28.2602 lambda_c=1.9926um
+ 191 niriss-f200w primary_area=244789.2cm2 ABZP=28.2602 lambda_c= 19926
     1  13590.00 0.0000e+00
     2  13656.42 0.0000e+00
     3  13722.84 0.0000e+00
@@ -45133,7 +45133,7 @@
   189  26076.78 1.1159e-04
   190  26143.20 7.2709e-05
   191  26209.62 5.1280e-05
-  91 niriss-f140m primary_area=244789.2cm2 ABZP=27.3944 lambda_c=1.4035um
+  91 niriss-f140m primary_area=244789.2cm2 ABZP=27.3944 lambda_c= 14035
     1  11920.00 2.0419e-06
     2  11966.78 1.8220e-06
     3  12013.57 2.9142e-06
@@ -45225,7 +45225,7 @@
    89  16037.06 3.7408e-06
    90  16083.85 3.0023e-06
    91  16130.63 2.9834e-06
- 113 niriss-f158m primary_area=244789.2cm2 ABZP=27.4494 lambda_c=1.5857um
+ 113 niriss-f158m primary_area=244789.2cm2 ABZP=27.4494 lambda_c= 15857
     1  12840.00 0.0000e+00
     2  12892.86 0.0000e+00
     3  12945.71 2.2477e-06
@@ -45339,7 +45339,7 @@
   111  18654.29 4.4914e-08
   112  18707.15 1.2058e-06
   113  18760.01 3.6461e-08
- 251 g_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=4798.2 AB-Vega=-0.089
+ 251 g_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 4798.2 AB-Vega=-0.089
      1 3500.0  0.000e+00
      2 3510.0  1.000e-04
      3 3520.0  2.000e-04
@@ -45591,7 +45591,7 @@
    249 5980.0  1.000e-04
    250 5990.0  1.000e-04
    251 6000.0  1.000e-04
- 582 r_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=6218.4 AB-Vega=0.223
+ 582 r_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 6218.4 AB-Vega=0.223
      1 5001.9  5.800e-03
      2 5006.1  5.900e-03
      3 5010.3  5.900e-03
@@ -46174,7 +46174,7 @@
    580 7489.4  4.000e-03
    581 7493.8  4.100e-03
    582 7498.2  3.900e-03
- 566 i_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=7727.0 AB-Vega=0.468
+ 566 i_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 7727.0 AB-Vega=0.468
      1 6503.0  3.600e-03
      2 6507.3  3.500e-03
      3 6511.6  3.600e-03
@@ -46741,7 +46741,7 @@
    564 8990.2  7.300e-03
    565 8994.7  7.200e-03
    566 8999.2  7.000e-03
-  76 z_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=8908.2 AB-Vega=0.522
+  76 z_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 8908.2 AB-Vega=0.522
      1 8160.0  0.000e+00
      2 8180.0  4.200e-03
      3 8200.0  0.000e+00
@@ -46818,7 +46818,7 @@
     74 9620.0  -0.000e+00
     75 9640.0  4.000e-04
     76 9660.0  4.000e-04
- 101 y_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=9775.1 AB-Vega=0.740
+ 101 y_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 9775.1 AB-Vega=0.740
      1 9000.0  7.500e-03
      2 9020.0  3.300e-03
      3 9040.0  3.000e-04
@@ -46920,7 +46920,7 @@
     99 10960.0  0.000e+00
    100 10980.0  0.000e+00
    101 11000.0  0.000e+00
-2401 NB816_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=8176.7 AB-Vega=0.476
+2401 NB816_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 8176.7 AB-Vega=0.476
      1 7002.7  0.000e+00
      2 7003.0  0.000e+00
      3 7004.0  0.000e+00
@@ -49322,7 +49322,7 @@
   2399 8998.0  0.000e+00
   2400 8999.0  0.000e+00
   2401 8999.2  0.000e+00
-1001 NB921_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c=9213.2 AB-Vega=0.647
+1001 NB921_HSC.txt http://cosmos.astro.caltech.edu/page/filterset  lambda_c= 9213.2 AB-Vega=0.647
      1 9000.0  6.380e-04
      2 9000.5  4.786e-04
      3 9001.0  4.255e-04
