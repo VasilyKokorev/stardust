@@ -29,3 +29,15 @@ def to_sigma(arr):
         except:
             return -99.
         return np.mean([perc[2]-perc[1],perc[1]-perc[0]])
+
+
+def MBB(type=0):
+    '''
+    type: 0 - optically thin MBB, 1 - optically thick MBB, 2 - double optically thin MBB
+    '''
+
+    def MBB_thin(Nbb,beta,T):
+        return None
+    func = MBB_thin
+
+    return func

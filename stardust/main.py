@@ -50,7 +50,7 @@ ir_cutoff=20
 
 class ctf(object):
 
-    def __init__(self, idx = None,config_file=None,**kwargs):
+    def __init__(self, idx = None,config_file=None,apply_zp=False,**kwargs):
        
         self.kwargs = kwargs
 
@@ -68,7 +68,7 @@ class ctf(object):
         self.filters_all = filters
 
         self.read_config()
-        self.read_catalogue(idx=idx)
+        self.read_catalogue(idx=idx,apply_zp=apply_zp)
         self.make_template_grid(**kwargs)
         self.prepare_products()
 
@@ -96,7 +96,7 @@ class ctf(object):
 
         return None
 
-    def read_catalogue(self, idx = None, cleanup=True):
+    def read_catalogue(self, idx = None, cleanup=True,apply_zp=False):
         """
         READ THE INPUT CATALOGUE
         ADD THE NECESSARY FILTERS TO FILTER LIST
@@ -170,6 +170,17 @@ class ctf(object):
         self.fnu = np.array((np.array(self.data[band_names])).tolist())
         self.efnu = np.array((np.array(self.data[err_band_names])).tolist())
         self.wav = np.tile(self.sfx,(len(self.fnu[:,0]),1))
+
+        
+        if apply_zp:
+            self.zp = self.apply_zeropoint()
+            if len(self.zp)==len(self.fnu[0,:]):
+                print('Applying Zeropoint corrections')
+                self.fnu*=self.zp
+                self.efnu*=self.zp
+            else:
+                print('Length mismatch in the zeropoints and bands in the catalogue, check the zp file')
+
 
         #self.param = np.array((np.array(self.data[param_names])).tolist())
 
@@ -1205,11 +1216,18 @@ class ctf(object):
         A=S3*(10**5)**alpha
         return A
 
-    def fit_MBB(self,idx,beta=None,kappa=None,kind=0):
+    def fit_MBB(self,idx,beta=None,kappa=None,type=0):
         """
         FIT A MODIFIED BLACKBODY FUNCTION
-        kind: 0 - optically thin MBB, 1 - optically thick MBB, 2 - double optically thin MBB
+        type: 0 - optically thin MBB, 1 - optically thick MBB, 2 - double optically thin MBB
         """
+
+        if beta is None:
+            beta = 1.8
+
+        if kappa is None:
+            kappa = 0.51*(250/850)**beta
+
 
         fnu = np.copy(self.fnu[idx])
         efnu = np.copy(self.efnu[idx])
@@ -1218,6 +1236,11 @@ class ctf(object):
         efnu[(fnu/efnu)<=3]*=3
 
         to_fit = (fnu>1e-11) & (restwav>40)
+
+        fnu = fnu[to_fit]
+        efnu = efnu[to_fit]
+
+
 
 
 
@@ -1652,3 +1675,19 @@ class ctf(object):
             output = self.mp_output(idx,coeffs_obj,chi_obj,A)
 
             return idx, output
+
+    def apply_zeropoint(self):
+        try:
+            zp_file=np.loadtxt(self.config['ZP_FILE'],dtype='str')
+            print(f'Added zeropoint corrections from ' + self.config['ZP_FILE'])
+            zp_band_names=zp_file[:,0].tolist()
+            zp_corr=zp_file[:,1].tolist()
+            zp_corr = np.float_(np.array(zp_corr))
+            return zp_corr
+        except:
+            print('Zeropoint file not defined. Skipping...')
+
+            return None
+
+
+
