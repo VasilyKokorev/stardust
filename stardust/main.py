@@ -121,11 +121,26 @@ class ctf(object):
             print('Read band file: ' + self.config['BANDS_FILE'])
             print('Read param file: ' + self.config['PARAM_FILE'])
 
+        if len(bnds[0,:])>2:
+            print('Using Legacy Format')
+            filtname=bnds[:,0].tolist() #Band Filter ID
+            band_names=bnds[:,1].tolist() #Band Name
+            err_band_names=bnds[:,2].tolist() #Error
         
-        filtname=bnds[:,0].tolist() #Band Filter ID
-        band_names=bnds[:,1].tolist() #Band Name
-        err_band_names=bnds[:,2].tolist() #Error
-
+        else:
+            print('Using eazy-py Format')
+            filtname = []
+            band_names = []
+            err_band_names = []
+            for i,_ in enumerate(bnds[:,0]):
+                fname = bnds[i,1][1:]
+                if fname not in filtname:
+                    filtname.append(fname)
+                if bnds[i,1].startswith('F'):
+                    band_names.append(bnds[i,0])
+                if bnds[i,1].startswith('E'):
+                    err_band_names.append(bnds[i,0])
+          
         param_names=prms[:,1].tolist() #Get list of parameters (z,Mstar etc.)
 
         if param_names[2]=='None':
