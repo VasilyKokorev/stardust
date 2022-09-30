@@ -3,6 +3,8 @@
 ## Translate File
 The translate **.bands** file should contain the filter id and the correspinding names for flux and flux uncertainty entries in the catalogue. Please follow [this example](https://github.com/VasilyKokorev/stardust/blob/master/example/stellar%2Bir/example.bands).
 
+It is also possible to use the .translate files directly from EAZY.
+
 Stardust uses the same filter convention as [EAZY](https://github.com/gbrammer/eazy-py). 
 
 
