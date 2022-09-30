@@ -45,12 +45,14 @@ detection_threshold=3 #In sigma
 ir_detections=3 
 ir_cutoff=20
 
+__version__ = "1.0.2"
+
 
 #===============================================================================
 
 class ctf(object):
 
-    def __init__(self, idx = None,config_file=None,apply_zp=False,**kwargs):
+    def __init__(self, idx = None,config_file=None,zeropoint_file=None,**kwargs):
        
         self.kwargs = kwargs
 
@@ -64,11 +66,12 @@ class ctf(object):
 
 
         self.config_file = config_file
+        self.zp_file = zeropoint_file
 
         self.filters_all = filters
 
         self.read_config()
-        self.read_catalogue(idx=idx,apply_zp=apply_zp)
+        self.read_catalogue(idx=idx)
         self.make_template_grid(**kwargs)
         self.prepare_products()
 
@@ -96,7 +99,7 @@ class ctf(object):
 
         return None
 
-    def read_catalogue(self, idx = None, cleanup=True,apply_zp=False):
+    def read_catalogue(self, idx = None, cleanup=True):
         """
         READ THE INPUT CATALOGUE
         ADD THE NECESSARY FILTERS TO FILTER LIST
@@ -123,19 +126,20 @@ class ctf(object):
 
         if len(bnds[0,:])>2:
             print('Using Legacy Format')
-            filtname=bnds[:,0].tolist() #Band Filter ID
+            self.f_numbers=bnds[:,0].tolist() #Band Filter ID
             band_names=bnds[:,1].tolist() #Band Name
             err_band_names=bnds[:,2].tolist() #Error
         
         else:
             print('Using eazy-py Format')
-            filtname = []
+            filter_dict = {}
+            self.f_numbers = []
             band_names = []
             err_band_names = []
             for i,_ in enumerate(bnds[:,0]):
                 fname = bnds[i,1][1:]
-                if fname not in filtname:
-                    filtname.append(fname)
+                if fname not in self.f_numbers:
+                    self.f_numbers.append(fname)
                 if bnds[i,1].startswith('F'):
                     band_names.append(bnds[i,0])
                 if bnds[i,1].startswith('E'):
@@ -148,7 +152,7 @@ class ctf(object):
             param_names[2]='Mstar'
 
 
-        filt_id=np.int_(filtname).tolist()
+        filt_id=np.int_(self.f_numbers).tolist()
 
 
         #Append the filters to be used later on
@@ -187,14 +191,15 @@ class ctf(object):
         self.wav = np.tile(self.sfx,(len(self.fnu[:,0]),1))
 
         
-        if apply_zp:
+        if self.zp_file is not None:
+            print(self.zp_file)
             self.zp = self.apply_zeropoint()
             if len(self.zp)==len(self.fnu[0,:]):
                 print('Applying Zeropoint corrections')
                 self.fnu*=self.zp
                 self.efnu*=self.zp
             else:
-                print('Length mismatch in the zeropoints and bands in the catalogue, check the zp file')
+                print('Length mismatch in the zeropoints and bands in the catalogue, check the zeropoint file')
 
 
         #self.param = np.array((np.array(self.data[param_names])).tolist())
@@ -1692,13 +1697,20 @@ class ctf(object):
             return idx, output
 
     def apply_zeropoint(self):
+        zp = np.zeros_like(self.fnu[0,:])
         try:
-            zp_file=np.loadtxt(self.config['ZP_FILE'],dtype='str')
-            print(f'Added zeropoint corrections from ' + self.config['ZP_FILE'])
-            zp_band_names=zp_file[:,0].tolist()
-            zp_corr=zp_file[:,1].tolist()
-            zp_corr = np.float_(np.array(zp_corr))
-            return zp_corr
+            lines = open(self.zp_file).readlines()
+            for line in lines:
+                if not line.startswith('F'):
+                    continue
+            
+                fnum = int(line.strip().split()[0][1:])
+                if str(fnum) in self.f_numbers:
+                    ix = np.int_(self.f_numbers) == fnum
+                    zp[ix] = float(line.split()[1])
+            print(f'Added zeropoint corrections from ' + self.zp_file)
+
+            return zp
         except:
             print('Zeropoint file not defined. Skipping...')
 
