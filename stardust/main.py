@@ -132,19 +132,31 @@ class ctf(object):
         
         else:
             print('Using eazy-py Format')
+            '''Load in the file as dictionary to remove potential duplicates'''
             filter_dict = {}
+            lines = open(self.config['BANDS_FILE']).readlines()
+
+            for line in lines:
+                spl = line.split()
+                key = spl[0]
+                filter_dict[key] = spl[1]
+
             self.f_numbers = []
             band_names = []
             err_band_names = []
-            for i,_ in enumerate(bnds[:,0]):
-                fname = bnds[i,1][1:]
+            for i,val in enumerate(filter_dict.values()):
+
+                fname = val[1:]
+                name = list(filter_dict.keys())[i]
                 if fname not in self.f_numbers:
                     self.f_numbers.append(fname)
-                if bnds[i,1].startswith('F'):
-                    band_names.append(bnds[i,0])
-                if bnds[i,1].startswith('E'):
-                    err_band_names.append(bnds[i,0])
-          
+
+                if val.startswith('F'):
+                        band_names.append(name)
+
+                if val.startswith('E'):
+                    err_band_names.append(name)
+                  
         param_names=prms[:,1].tolist() #Get list of parameters (z,Mstar etc.)
 
         if param_names[2]=='None':
@@ -170,6 +182,7 @@ class ctf(object):
                 if 'lambda' in s:
                     self.sfx.append(lspl[index+1])
         self.sfx=1e-4*np.float_(self.sfx) #Convert central wavelength to microns
+
 
         assert len(self.fnames)==len(band_names)==len(err_band_names),'ERROR: Filter range does not match available photometry, check band names'
 
