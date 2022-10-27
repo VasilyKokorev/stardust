@@ -47,6 +47,17 @@ ir_cutoff=20
 
 __version__ = "1.0.2"
 
+if (sys.version_info <= (3,0)):
+    print(f'Python Version {sys.version[:6]}, is unsupported. Please use Python 3.9+')
+    sys.exit()
+    
+if (sys.version_info >= (3, 5)) and (sys.version_info <= (3, 7)):
+    old_ver = True
+    print(f'Detected Python {sys.version[:6]}, switching multiprocessing packages')
+    
+if (sys.version_info > (3, 7)):
+    old_ver = False
+
 
 #===============================================================================
 
@@ -137,6 +148,8 @@ class ctf(object):
             lines = open(self.config['BANDS_FILE']).readlines()
 
             for line in lines:
+                if line.startswith('#'):
+                    continue
                 spl = line.split()
                 key = spl[0]
                 filter_dict[key] = spl[1]
@@ -416,7 +429,7 @@ class ctf(object):
          Load IR templates
         '''
 
-        OT=Table.read(f'{templ_loc}/narrow_test_no_lines_ext.fits')
+        OT=Table.read(f'{templ_loc}/narrow_no_lines_ext_fix.fits')
         OT_arr = (np.lib.recfunctions.structured_to_unstructured(OT.as_array())).T
 
         self.templ = np.array(OT['lambda']) #Template wavelength array in microns
@@ -896,7 +909,6 @@ class ctf(object):
         template_fnu_units=(1*u.solLum / u.Hz)
         to_physical = fnu_scl*fnu_units*4*np.pi*dl**2/(1+z)
         to_physical /= (1*template_fnu_units).to(u.erg/u.second/u.Hz)
-    
 
         return to_physical
 
@@ -1122,7 +1134,7 @@ class ctf(object):
         return obs_flux
 
 
-    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False,return_output=False):
+    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False):
         
 
         irdx = np.int_(self.best_ir_idx[idx])
@@ -1141,6 +1153,13 @@ class ctf(object):
             ax.fill_between(sed_x,0,sed_opt,color='royalblue',alpha=0.2,label='Stellar')
             ax.fill_between(sed_x,0,sed_agn,color='g',alpha=0.2,label='AGN')
             ax.fill_between(sed_x,0,sed_ir,color='maroon',alpha=0.2,label='Dust')
+
+        if detailed:
+            #To plot optical templates individually
+            for i,tempnorm in enumerate(self.best_coeffs[idx,:-3]):
+                if tempnorm==0:
+                    continue
+                ax.plot(sed_x,tempnorm*self.optical_grid[:,i],label=f'{i}')
 
         if radio:
             sed_radio = self.radio_sed(idx,sed_x,alpha=-0.75)
@@ -1180,12 +1199,12 @@ class ctf(object):
         fig.tight_layout()
         fig.show()
 
-        if return_output:
-            output = {'lambda':sed_x,'templ_optical':sed_opt,'templ_agn':sed_agn,'templ_ir':sed_ir,
-            'pivot':self.wav[idx],'fobs':self.fnu[idx],'ferr':self.efnu[idx],'templ_radio':sed_radio}
-            return output
+        #if return_output:
+        output = {'lambda':sed_x,'templ_optical':sed_opt,'templ_agn':sed_agn,'templ_ir':sed_ir,
+            'pivot':self.wav[idx],'fobs':self.fnu[idx],'efobs':self.efnu[idx],'templ_radio':sed_radio}
+            
 
-        return None
+        return fig,output
 
 
     def radio_sed(self,idx,lam,alpha=-0.75,use_own_mass=False,allow_own_mass=True):
@@ -1370,14 +1389,18 @@ class ctf(object):
         else:
             obj = range(self.NOBJ)
 
-        global mp_wrapper
+        if old_ver:
+            import multiprocessing as mp
+            global mp_wrapper
+
+        if not old_ver:
+            import multiprocess as mp
+
 
         def mp_wrapper(i):
             idx,otp = self.fit_object(i,parallel=True)
             return idx,otp
 
-
-        import multiprocessing as mp
 
         if n_proc>mp.cpu_count():
                 print(f'Requested {n_proc} threads, but only {mp.cpu_count()} are available')
