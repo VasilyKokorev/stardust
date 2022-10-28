@@ -18,7 +18,7 @@ Requirements:
 ~~~~~~~~~~~~~
     .. code:: 
     
-       python==3.6.10
+       python>=3.9.0
        numpy
        scipy
        matplotlib
