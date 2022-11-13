@@ -262,6 +262,8 @@ class ctf(object):
             self.dec = self.data[dec_col]
         except:
             print('Could not automatically assign the ra,dec columns')
+            self.ra = np.zeros_like(len(self.data))
+            self.dec = np.zeros_like(len(self.data))
 
         print('Data Loaded Successfully')
         print('Objects to Fit:',len(self.fnu[:,0]))
@@ -778,7 +780,7 @@ class ctf(object):
 
         return outy
 
-    def fit_object(self,idx,scale_sigma=True,parallel=False):
+    def fit_object(self,idx,scale_sigma=True,parallel=False,vnorm=False):
         """
         FIT A SINGLE GALAXY
 
@@ -850,12 +852,13 @@ class ctf(object):
 
        
         if not parallel:
-            self.compute_physical_params(idx)
+            self.compute_physical_params(idx,vnorm=vnorm)
             self.compute_uncertaintites_simple(idx,coeffs_obj,chi_obj,A)
             
             return None
 
         if parallel:
+           
             output = self.mp_output(idx,coeffs_obj,chi_obj,A)
 
             return idx, output
@@ -867,14 +870,33 @@ class ctf(object):
 
 
 
-    def compute_physical_params(self,idx):
+    def compute_physical_params(self,idx,vnorm=False):
+
         norm = self.normalise_coeffs(idx)
 
         coeffs_rest = (self.best_coeffs[idx,:12].T*norm).T
         coeffs_norm = self.best_coeffs[idx,:12]/np.sum(self.best_coeffs[idx,:12])
         coeffs_rest = np.array(coeffs_rest)
 
-        self.mstar[idx] = coeffs_rest.dot(self.optical_param['mass'])
+        if vnorm:
+            print('Using V-band luminosity to normalise physical parameters')
+            restV,Lv,templf = self.get_rest_flux(idx,154)
+
+            coeffs_vnorm = self.best_coeffs[idx,:12]*templf
+            coeffs_vnorm/= coeffs_vnorm.sum()
+
+            Lv_norm = (coeffs_vnorm*self.optical_param['Lv']).sum()
+            Lv_norm *= u.solLum
+            Mv = (coeffs_vnorm*self.optical_param['mass']).sum()
+            Mv *= u.solMass 
+            Mv *= 1./Lv_norm
+
+            self.mstar[idx] = (Mv*Lv).value
+
+        else:
+            self.mstar[idx] = coeffs_rest.dot(self.optical_param['mass'])
+
+
         self.sfr_optical[idx] = coeffs_rest.dot(self.optical_param['sfr'])
         self.av[idx] = coeffs_norm.dot(self.optical_param['Av'])
         self.mdust[idx] = self.dg_ratio*self.best_coeffs[idx,-1]*self.dustnorm*(const.m_p/const.M_sun)/self.lnu_to_fnu[idx]
@@ -1134,6 +1156,46 @@ class ctf(object):
         return obs_flux
 
 
+    def get_rest_flux(self,idx,filter_id):
+
+        filter_x = self.filters_all[filter_id].wave/1e4
+        filter_y = self.filters_all[filter_id].throughput
+
+        lspl=self.filters_all[filter_id].name.split()
+
+        for index,s in enumerate(lspl):
+            if 'lambda' in s:
+                filter_cen = lspl[index+1]*u.Angstrom
+                
+        
+
+        irdx = np.int_(self.best_ir_idx[idx])
+
+        sed_x = self.templ
+        sed_opt = np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
+        sed_agn = np.sum(self.best_coeffs[idx,-3:-1]*self.agn_grid,axis = 1)
+        sed_ir = self.best_coeffs[idx,-1]*self.dustnorm*self.ir_grid[:,irdx[0],irdx[1],irdx[2]]
+
+        sed_tot = sed_opt + sed_agn + sed_ir
+
+        lum_dist = (cosmo.luminosity_distance(self.zcat[idx])).to(u.cm)
+
+        rest_flux = self.convolver(sed_x,sed_tot,filter_x,filter_y)
+
+        lnu = (rest_flux*u.mJy).to(u.erg/u.s/u.Hz/u.cm**2)*(4*np.pi*lum_dist**2)/(1+self.zcat[idx])
+
+        L = (lnu*(const.c/filter_cen)).to(u.L_sun) # Luminosity at chosen filter
+
+        templf = []
+        for i in range(self.optical_grid.shape[1]):
+            x_ = self.templ
+            y_ = self.optical_grid[:,i]
+
+            templf.append(self.convolver(x_,y_,filter_x,filter_y))
+
+        return rest_flux,L,templf
+
+
     def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False):
         
 
@@ -1346,7 +1408,7 @@ class ctf(object):
         
         return mp_out
 
-    def mp_restructure(self,mp_out):
+    def mp_restructure(self,mp_out,vnorm=False):
 
         failed = []
         for i in range(len(mp_out)):
@@ -1362,7 +1424,7 @@ class ctf(object):
             A = mp_out[i][1][7]
 
             try:
-                self.compute_physical_params(idx)
+                self.compute_physical_params(idx,vnorm=vnorm)
 
                 self.compute_uncertaintites_simple(idx,coeffs_obj,chi_obj,A)
             except:
@@ -1375,7 +1437,7 @@ class ctf(object):
                 print(self.id[idx])
         return None
 
-    def fit_catalogue(self, n_proc=-1,n_obj=None,save_results=True):
+    def fit_catalogue(self, n_proc=-1,n_obj=None,save_results=True,vnorm=False):
         '''
         Main function to fit the full catalogue
         Outputs the ctf class object with all the parameters
@@ -1445,7 +1507,7 @@ class ctf(object):
             mp_out = np.array(pool.map(mp_wrapper,obj))
 
         print('Finished Fitting, Preparing Output..')
-        self.mp_restructure(mp_out)
+        self.mp_restructure(mp_out,vnorm=vnorm)
 
         if save_results:
             self.save_results()
@@ -1722,7 +1784,7 @@ class ctf(object):
 
        
         if not parallel:
-            self.compute_physical_params(idx)
+            self.compute_physical_params(idx,vnorm=vnorm)
             self.compute_uncertaintites_simple(idx,coeffs_obj,chi_obj,A)
             
             return None

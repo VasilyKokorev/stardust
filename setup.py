@@ -7,7 +7,7 @@ setup(
     author = "Vasily Kokorev",
     author_email = "vasily.kokorev.astro@gmail.com",
     description = "Composite Template SED Fitting Tool",
-    version = "1.0.3",
+    version = "1.0.5",
     license = "MIT",
     url = "https://github.com/vasilykokorev/stardust",  
     packages=['stardust'],
