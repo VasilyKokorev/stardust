@@ -63,4 +63,4 @@ Troubleshooting:
 Contacts:
 ~~~~~~
 
-Vasily Kokorev: vasily.kokorev.astro@gmail.com
+Vasily Kokorev: vasily.kokorev.astro@gmail.com / kokorev@astro.rug.nl
