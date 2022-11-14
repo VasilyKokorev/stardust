@@ -879,7 +879,6 @@ class ctf(object):
         coeffs_rest = np.array(coeffs_rest)
 
         if vnorm:
-            print('Using V-band luminosity to normalise physical parameters')
             restV,Lv,templf = self.get_rest_flux(idx,154)
 
             coeffs_vnorm = self.best_coeffs[idx,:12]*templf
@@ -1507,6 +1506,10 @@ class ctf(object):
             mp_out = np.array(pool.map(mp_wrapper,obj))
 
         print('Finished Fitting, Preparing Output..')
+
+        if vnorm:
+            print('Using V-band luminosity to normalise physical parameters')
+            
         self.mp_restructure(mp_out,vnorm=vnorm)
 
         if save_results:
