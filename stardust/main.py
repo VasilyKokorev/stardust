@@ -193,7 +193,13 @@ class ctf(object):
             self.fnames.append(lspl[0])
             for index,s in enumerate(lspl):
                 if 'lambda' in s:
-                    self.sfx.append(lspl[index+1])
+                    wav_str = lspl[index+1]
+                    #if 'um' in wav_str:
+                    #    wav_str = wav_str[:-2]
+                    wav_str = wav_str.strip('um')
+                    #wav_num =  ''.join(filter(str.isdigit, wav_str) ) #Make sure that only numbers are used
+                    self.sfx.append(wav_str)
+                    #self.sfx.append(lspl[index+1])
         self.sfx=1e-4*np.float_(self.sfx) #Convert central wavelength to microns
 
 
@@ -1509,7 +1515,7 @@ class ctf(object):
 
         if vnorm:
             print('Using V-band luminosity to normalise physical parameters')
-            
+
         self.mp_restructure(mp_out,vnorm=vnorm)
 
         if save_results:
