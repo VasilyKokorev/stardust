@@ -1506,7 +1506,7 @@ class ctf(object):
             mp_out = []
             for res in tqdm(jobs):
                 mp_out.append(res.get())
-            mp_out=np.array(mp_out)
+            mp_out=np.array(mp_out,dtype=object)
 
         else:
             mp_out = np.array(pool.map(mp_wrapper,obj))
