@@ -45,7 +45,7 @@ detection_threshold=3 #In sigma
 ir_detections=3 
 ir_cutoff=20
 
-__version__ = "1.0.2"
+__version__ = "1.0.6"
 
 if (sys.version_info <= (3,0)):
     print(f'Python Version {sys.version[:6]}, is unsupported. Please use Python 3.9+')
@@ -380,6 +380,10 @@ class ctf(object):
         self.umin = np.zeros(self.NOBJ)
         self.qpah = np.zeros(self.NOBJ)
         self.gamma = np.zeros(self.NOBJ)
+
+
+        # For template uncertainties
+        self.resampled_coeffs = {} # As dictionary
 
         for i in range(self.NOBJ):
             sn = self.fnu[i]/self.efnu[i]
@@ -943,6 +947,8 @@ class ctf(object):
     def compute_uncertaintites_simple(self,idx,coeffs_obj,chi_obj,A):
         resampled_coeffs = self.resample_coeffs(idx,A)
 
+        self.resampled_coeffs[idx] = resampled_coeffs # Fill the dictionary with resampled coeffs
+
         norm = self.normalise_coeffs(idx)
 
         coeffs_rest_resampled = (resampled_coeffs[:,:12].T*norm).T
@@ -1201,7 +1207,7 @@ class ctf(object):
         return rest_flux,L,templf
 
 
-    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False):
+    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False,plot_uncert=False,uncert_kwargs={}):
         
 
         irdx = np.int_(self.best_ir_idx[idx])
@@ -1233,6 +1239,18 @@ class ctf(object):
             sed_tot += sed_radio
         else:
             sed_radio = np.zeros_like(self.templ)
+
+
+        if plot_uncert:
+            resamp = self.resampled_coeffs[idx]
+            for c_i in range(resamp.shape[0]):
+                c = resamp[c_i]
+                sed_opt_i = np.sum(c[:-3]*self.optical_grid,axis = 1)
+                sed_agn_i = np.sum(c[-3:-1]*self.agn_grid,axis = 1)
+                sed_ir_i = c[-1]*self.dustnorm*self.ir_grid[:,irdx[0],irdx[1],irdx[2]]
+                sed_tot_i = sed_opt_i + sed_agn_i + sed_ir_i
+                ax.plot(sed_x,sed_tot_i,**uncert_kwargs)
+
 
         ax.plot(sed_x,sed_tot,'k',label='Total',lw=3,alpha=0.6,zorder=10)
 
