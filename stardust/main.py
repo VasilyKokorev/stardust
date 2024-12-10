@@ -456,6 +456,7 @@ class ctf(object):
 
         self.templ = np.array(OT['lambda']) #Template wavelength array in microns
         if self.config['IGM_SWITCH']:
+            print('Added IGM placeholder')
             self.igm_scale = np.ones((self.NOBJ,len(self.templ)))
 
         self.tempnu = c.value*(self.templ*1e-6)**-1 #In Hz
@@ -680,7 +681,6 @@ class ctf(object):
 
     def convolve_all_templates(self,idx,norm=True):
 
-        add_igm = self.config['IGM_SWITCH']
         start=time.time()
 
         z = self.zcat[idx]
@@ -690,9 +690,9 @@ class ctf(object):
         if norm:
             self.dustnorm = (10**10*(const.M_sun/const.m_p)).value
 
-        if add_igm:
+        if self.config['IGM_SWITCH']:
+            print('Adding IGM')
             igm_mod = self.igm.Asada24(sigmoid_params=(3.48347968, 1.25809685, 18.24922789), scale_tau=1., add_cgm=True)
-
             igmz = self.templ*0.+1
             lyman = self.templ < 2000./1e4
             igmz[lyman] = igm_mod.full_IGM(z, sedx[lyman]*1e4)
