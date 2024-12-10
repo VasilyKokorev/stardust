@@ -455,6 +455,9 @@ class ctf(object):
         OT_arr = (np.lib.recfunctions.structured_to_unstructured(OT.as_array())).T
 
         self.templ = np.array(OT['lambda']) #Template wavelength array in microns
+        if self.config['IGM_SWITCH']:
+            self.igm_scale = np.ones((self.NOBJ,len(self.templ)))
+
         self.tempnu = c.value*(self.templ*1e-6)**-1 #In Hz
         self.flamfnu = (self.templ**2)/c.value #Flambda to Fnu conversion shaped like template wavelength array
 
@@ -695,6 +698,8 @@ class ctf(object):
             igmz[lyman] = igm_mod.full_IGM(z, sedx[lyman]*1e4)
         else:
             igmz = 1.
+
+        self.igm_scale[idx,:] = igmz
             
 
         self.fconv_optical = np.zeros((len(self.sfx),self.optical_grid.shape[1]))
@@ -1227,13 +1232,16 @@ class ctf(object):
         return rest_flux,L,templf
 
 
-    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False,plot_uncert=False,uncert_kwargs={}):
+    def show_fit(self,idx,xlim=None,ylim=None,components=True,radio=False,detailed=False,plot_uncert=False,add_igm=True,uncert_kwargs={}):
         
 
         irdx = np.int_(self.best_ir_idx[idx])
 
         sed_x = self.templ  * (1+self.zcat[idx])
-        sed_opt = np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
+        if add_igm:
+            sed_opt = self.igm_scale[idx]*np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
+        else:
+            sed_opt = np.sum(self.best_coeffs[idx,:-3]*self.optical_grid,axis = 1)
         sed_agn = np.sum(self.best_coeffs[idx,-3:-1]*self.agn_grid,axis = 1)
         sed_ir = self.best_coeffs[idx,-1]*self.dustnorm*self.ir_grid[:,irdx[0],irdx[1],irdx[2]]
 
@@ -1860,6 +1868,3 @@ class ctf(object):
             print('Zeropoint file not defined. Skipping...')
 
             return None
-
-
-
