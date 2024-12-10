@@ -26,6 +26,13 @@ try:
 except:
     HAS_TQDM = False
 
+try:
+    from eazy import igm
+    print('Successfully imported the IGM module from EAZY')
+except:
+    print('Failed to import the IGM module from EAZY \n, make sure that the package is installed correctly')
+    print('Ignoring IGM absorption')
+
 cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725)
 
 c=const.c
@@ -85,6 +92,9 @@ class ctf(object):
         self.read_catalogue(idx=idx)
         self.make_template_grid(**kwargs)
         self.prepare_products()
+
+        if self.config['IGM_SWITCH']==1:
+            self.igm = igm
 
         return None
 
@@ -667,6 +677,7 @@ class ctf(object):
 
     def convolve_all_templates(self,idx,norm=True):
 
+        add_igm = self.config['IGM_SWITCH']
         start=time.time()
 
         z = self.zcat[idx]
@@ -676,6 +687,15 @@ class ctf(object):
         if norm:
             self.dustnorm = (10**10*(const.M_sun/const.m_p)).value
 
+        if add_igm:
+            igm_mod = self.igm.Asada24(sigmoid_params=(3.48347968, 1.25809685, 18.24922789), scale_tau=1., add_cgm=True)
+
+            igmz = self.templ*0.+1
+            lyman = self.templ < 2000./1e4
+            igmz[lyman] = igm_mod.full_IGM(z, sedx[lyman]*1e4)
+        else:
+            igmz = 1.
+            
 
         self.fconv_optical = np.zeros((len(self.sfx),self.optical_grid.shape[1]))
         self.fconv_agn = np.zeros((len(self.sfx),self.agn_grid.shape[1]))
@@ -691,11 +711,11 @@ class ctf(object):
         if self.config['FIT_STELLAR']:
             for i,_ in enumerate(self.optical_grid[0,:]):
                 for f,_ in enumerate(self.sfx):
-                    self.fconv_optical[f,i] = self.convolver(sedx,self.optical_grid[:,i],self.filters[f][0],self.filters[f][1],mode='opt')
+                    self.fconv_optical[f,i] = self.convolver(sedx,igmz*self.optical_grid[:,i],self.filters[f][0],self.filters[f][1],mode='opt')
 
                 if self.config['EXTRA_BANDS']:
                     for ff,_ in enumerate(extrawav):
-                        self.fconv_optical_extra[ff,i]=self.convolver(sedx,self.optical_grid[:,i],filt_extra[ff][0],filt_extra[ff][1],mode='opt')
+                        self.fconv_optical_extra[ff,i]=self.convolver(sedx,igmz*self.optical_grid[:,i],filt_extra[ff][0],filt_extra[ff][1],mode='opt')
 
 
         if self.config['FIT_AGN']:
